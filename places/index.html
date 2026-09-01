@@ -96,38 +96,6 @@
     margin: 0;
   }
 
-  .controls{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-    margin-top: 1.5rem;
-  }
-
-  .toggle{
-    background: none;
-    border: 1px solid var(--rule);
-    color: var(--ink-faint);
-    font-family: var(--mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    padding: 0.6rem 0.9rem;
-    cursor: pointer;
-    transition: color 0.3s ease, border-color 0.3s ease;
-  }
-
-  .toggle:hover{ color: var(--ink); border-color: var(--ink-faint); }
-  .toggle:focus-visible{ outline: 1px solid var(--ink-dim); outline-offset: 3px; }
-
-  .count{
-    font-family: var(--mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-
   .stage{
     flex: 1;
     min-height: 0;
@@ -323,18 +291,13 @@
   <h1>Places I've explored</h1>
   <p class="note">Drag to turn the globe. Every mark is somewhere I have been: tap to see what the place looks like.</p>
 
-  <div class="controls">
-    <button class="toggle" id="spin-toggle" type="button" aria-pressed="false">Stop rotation</button>
-    <span class="count" id="count"></span>
-  </div>
-
   <div class="stage">
     <div class="globe-holder">
       <canvas id="globe" aria-label="Rotatable globe marking visited places. The list beside it covers the same places."></canvas>
     </div>
 
     <nav>
-      <p class="index-head"><span>Index</span><span id="index-count"></span></p>
+      <p class="index-head"><span>Places</span><span id="index-count"></span></p>
       <ul class="index" id="index"></ul>
     </nav>
   </div>
@@ -358,7 +321,6 @@ function startGlobe(WORLD, PLACES) {
   var ctx = canvas.getContext("2d");
   var panel = document.getElementById("panel");
   var indexList = document.getElementById("index");
-  var spinToggle = document.getElementById("spin-toggle");
 
   var RAD = Math.PI / 180;
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -376,7 +338,6 @@ function startGlobe(WORLD, PLACES) {
   var vlat = 0;
   var hovered = -1;
   var selected = -1;
-  var spinning = !reduced;
 
   // ---- orientation ------------------------------------------------------
   //
@@ -706,8 +667,6 @@ function startGlobe(WORLD, PLACES) {
         clat = Math.max(-MAX_TILT, Math.min(MAX_TILT, clat + vlat));
         vlon *= 0.90;
         vlat *= 0.90;
-      } else if (spinning) {
-        clon += 0.055;
       }
     }
     setOrientation();
@@ -729,7 +688,7 @@ function startGlobe(WORLD, PLACES) {
     var headroom = window.innerHeight - top - gutter - 8;
 
     var available = Math.min(holder.clientWidth, headroom);
-    size = Math.max(260, Math.min(620, available));
+    size = Math.max(260, Math.min(800, available));
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(size * dpr);
     canvas.height = Math.round(size * dpr);
@@ -742,16 +701,6 @@ function startGlobe(WORLD, PLACES) {
   }
 
   // ---- interaction ------------------------------------------------------
-
-  function setSpinning(on) {
-    spinning = on;
-    spinToggle.textContent = on ? "Stop rotation" : "Start rotation";
-    spinToggle.setAttribute("aria-pressed", on ? "false" : "true");
-  }
-
-  spinToggle.addEventListener("click", function () {
-    setSpinning(!spinning);
-  });
 
   function pointAt(ev) {
     var rect = canvas.getBoundingClientRect();
@@ -782,7 +731,6 @@ function startGlobe(WORLD, PLACES) {
     lastY = ev.clientY;
     vlon = 0;
     vlat = 0;
-    setSpinning(false); // touch it once and it stops drifting under you
     canvas.classList.add("dragging");
     canvas.setPointerCapture(ev.pointerId);
   });
@@ -837,7 +785,6 @@ function startGlobe(WORLD, PLACES) {
   function open(i) {
     var place = PLACES[i];
     selected = i;
-    setSpinning(false);
     vlon = 0;
     vlat = 0;
 
@@ -927,13 +874,11 @@ function startGlobe(WORLD, PLACES) {
     indexList.appendChild(li);
   });
 
-  document.getElementById("count").textContent = PLACES.length + " places";
   document.getElementById("index-count").textContent = PLACES.length;
 
   window.addEventListener("resize", resize);
 
   resize();
-  setSpinning(!reduced);
   tick();
 
   requestAnimationFrame(function () {
