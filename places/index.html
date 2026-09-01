@@ -52,10 +52,15 @@
     overflow-x: hidden;
   }
 
+  /* A column the height of the window, so the stage below can claim whatever
+     the heading does not use and the globe always lands inside the fold. */
   .page{
     max-width: 78rem;
+    min-height: 100svh;
     margin: 0 auto;
-    padding: clamp(1.75rem, 5vw, 3.5rem) clamp(1.5rem, 5vw, 3.5rem) clamp(3rem, 6vw, 5rem);
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1.5rem, 5vw, 3.5rem) clamp(1.5rem, 3vw, 2.5rem);
   }
 
   .back{
@@ -124,18 +129,21 @@
   }
 
   .stage{
+    flex: 1;
+    min-height: 0;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 15rem;
     gap: clamp(2rem, 5vw, 4rem);
-    align-items: center;
-    margin-top: clamp(2rem, 5vw, 3.5rem);
+    align-items: start;
+    margin-top: clamp(1.5rem, 3vw, 2.25rem);
   }
 
   .globe-holder{
     position: relative;
     display: grid;
     place-items: center;
-    min-height: 20rem;
+    min-height: 0;
+    height: 100%;
   }
 
   canvas{
@@ -169,7 +177,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
-    max-height: 26rem;
+    /* Never let the index be the thing that makes the page scroll. */
+    max-height: min(26rem, calc(100svh - 24rem));
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--rule) transparent;
@@ -710,8 +719,17 @@ function startGlobe(WORLD, PLACES) {
 
   function resize() {
     var holder = canvas.parentElement;
-    var available = Math.min(holder.clientWidth, window.innerHeight - 250);
-    size = Math.max(260, Math.min(540, available));
+
+    // Measure the room actually left below the heading rather than guessing
+    // at a fixed offset: the heading's height varies with window width, and
+    // guessing is what pushed the globe off the bottom of wide screens.
+    var top = holder.getBoundingClientRect().top + window.scrollY;
+    var page = document.querySelector(".page");
+    var gutter = page ? parseFloat(getComputedStyle(page).paddingBottom) || 0 : 0;
+    var headroom = window.innerHeight - top - gutter - 8;
+
+    var available = Math.min(holder.clientWidth, headroom);
+    size = Math.max(260, Math.min(620, available));
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(size * dpr);
     canvas.height = Math.round(size * dpr);
