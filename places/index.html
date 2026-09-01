@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Places I've Explored - Joel Jussila</title>
+<meta name="description" content="A globe of the places I have been, with photographs from each of them.">
+<link rel="canonical" href="https://joeljussila.com/places/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Joel Jussila">
+<meta property="og:title" content="Places I've Explored - Joel Jussila">
+<meta property="og:description" content="A globe of the places I have been, with photographs from each of them.">
+<meta property="og:url" content="https://joeljussila.com/places/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Places I've Explored - Joel Jussila">
+<meta name="twitter:description" content="A globe of the places I have been, with photographs from each of them.">
+
+<meta name="theme-color" content="#0A0908">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400&family=Inter+Tight:wght@300;400&family=Newsreader:opsz,wght@6..72,200;6..72,300&display=swap">
+
+<style>
+  :root{
+    --ground: #0A0908;
+    --sea: #050403;
+    --land: #2A241C;
+    --land-edge: #453A2C;
+    --ink: #E8CFA0;
+    --ink-body: #DCC08E;
+    --ink-dim: #A78D63;
+    --ink-faint: #6B5A45;
+    --rule: #2A241C;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body{
+    margin: 0;
+    min-height: 100svh;
+    background: var(--ground);
+    color: var(--ink-body);
+    font-family: "Inter Tight", system-ui, -apple-system, sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .page{
+    max-width: 78rem;
+    margin: 0 auto;
+    padding: clamp(1.75rem, 5vw, 3.5rem) clamp(1.5rem, 5vw, 3.5rem) clamp(3rem, 6vw, 5rem);
+  }
+
+  .back{
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink-faint);
+    transition: color 0.3s ease;
+  }
+
+  .back:hover{ color: var(--ink-dim); }
+  .back:focus-visible{ outline: 1px solid var(--ink-dim); outline-offset: 4px; }
+
+  h1{
+    font-family: Newsreader, Georgia, "Times New Roman", serif;
+    font-weight: 200;
+    font-size: clamp(1.9rem, 5vw, 2.5rem);
+    line-height: 1.15;
+    color: var(--ink);
+    margin: 1.75rem 0 0.75rem;
+  }
+
+  .note{
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  .controls{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 1.5rem;
+  }
+
+  .toggle{
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink-faint);
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .toggle:hover{ color: var(--ink); border-color: var(--ink-faint); }
+  .toggle:focus-visible{ outline: 1px solid var(--ink-dim); outline-offset: 3px; }
+
+  .count{
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .stage{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 15rem;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+    margin-top: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .globe-holder{
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 20rem;
+  }
+
+  canvas{
+    display: block;
+    touch-action: none;
+    cursor: grab;
+    max-width: 100%;
+  }
+
+  canvas.dragging{ cursor: grabbing; }
+
+  .index-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding-bottom: 0.9rem;
+    margin: 0 0 0.6rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .index{
+    list-style: none;
+    margin: 0;
+    padding: 0 0.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    max-height: 26rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+
+  .index::-webkit-scrollbar{ width: 6px; }
+  .index::-webkit-scrollbar-thumb{ background: var(--rule); }
+
+  .index button{
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding: 0.4rem 0;
+    background: none;
+    border: 0;
+    text-align: left;
+    font-family: "Inter Tight", system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .index button:hover,
+  .index button[aria-current="true"]{ color: var(--ink); }
+  .index button:focus-visible{ outline: 1px solid var(--ink-dim); outline-offset: 3px; }
+
+  .index .n{
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- detail panel ---- */
+
+  .panel{
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(26rem, 100vw);
+    background: var(--ground);
+    border-left: 1px solid var(--rule);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    overflow-y: auto;
+    transform: translateX(101%);
+    z-index: 20;
+  }
+
+  .ready .panel{
+    transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .panel[data-open="true"]{ transform: none; }
+
+  .panel-close{
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink-faint);
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.85rem;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .panel-close:hover{ color: var(--ink); border-color: var(--ink-faint); }
+  .panel-close:focus-visible{ outline: 1px solid var(--ink-dim); outline-offset: 3px; }
+
+  .panel h2{
+    font-family: Newsreader, Georgia, serif;
+    font-weight: 200;
+    font-size: 1.9rem;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 1.75rem 0 0.5rem;
+  }
+
+  .coords{
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin: 0 0 2rem;
+  }
+
+  .frames{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .frame{
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--rule);
+    display: grid;
+    place-items: center;
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .frame img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (max-width: 860px){
+    .stage{ grid-template-columns: 1fr; gap: 2.5rem; }
+    .index{ max-height: 20rem; }
+    .panel{
+      top: auto;
+      width: 100%;
+      max-height: 82svh;
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+      transform: translateY(101%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ready .panel{ transition-duration: 0.01ms; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <a class="back" href="/"><span aria-hidden="true">&larr;</span> Joel Jussila</a>
+
+  <h1>Places I've explored</h1>
+  <p class="note">Drag to turn the globe. Every mark is somewhere I have been: tap to see what the place looks like.</p>
+
+  <div class="controls">
+    <button class="toggle" id="spin-toggle" type="button" aria-pressed="false">Stop rotation</button>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="stage">
+    <div class="globe-holder">
+      <canvas id="globe" aria-label="Rotatable globe marking visited places. The list beside it covers the same places."></canvas>
+    </div>
+
+    <nav>
+      <p class="index-head"><span>Index</span><span id="index-count"></span></p>
+      <ul class="index" id="index"></ul>
+    </nav>
+  </div>
+</div>
+
+<aside class="panel" id="panel" data-open="false" aria-hidden="true" aria-labelledby="panel-title">
+  <button class="panel-close" id="panel-close" type="button">Close</button>
+  <h2 id="panel-title"></h2>
+  <p class="coords" id="panel-coords"></p>
+  <div class="frames" id="panel-frames"></div>
+</aside>
+
+<script>
+function startGlobe(WORLD, PLACES) {
+  "use strict";
+
+  // PLACES and WORLD are loaded from places.json and world.json below.
+
+
+  var canvas = document.getElementById("globe");
+  var ctx = canvas.getContext("2d");
+  var panel = document.getElementById("panel");
+  var indexList = document.getElementById("index");
+  var spinToggle = document.getElementById("spin-toggle");
+
+  var RAD = Math.PI / 180;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var radius = 240;
+  var cx = 0;
+  var cy = 0;
+  var size = 0;
+
+  var dragging = false;
+  var moved = 0;
+  var lastX = 0;
+  var lastY = 0;
+  var vlon = 0;
+  var vlat = 0;
+  var hovered = -1;
+  var selected = -1;
+  var spinning = !reduced;
+
+  // ---- orientation ------------------------------------------------------
+  //
+  // Centre longitude and latitude, with the latitude stopped short of the
+  // poles. That limit is deliberate: it keeps north pointing up, so the map
+  // is always the right way round. Tumbling freely over the poles was worse
+  // to use and far more expensive to draw.
+
+  var clon = 15;
+  var clat = 20;
+  var MAX_TILT = 78;
+
+  // Rows of the rotation, held as loose numbers: this runs 30,000 times a
+  // frame and array lookups are not free.
+  var r00, r01, r02, r10, r11, r12, r20, r21, r22;
+
+  function setOrientation() {
+    var l = clon * RAD;
+    var p = clat * RAD;
+    var sinL = Math.sin(l), cosL = Math.cos(l);
+    var sinP = Math.sin(p), cosP = Math.cos(p);
+    r00 = -sinL;         r01 = cosL;          r02 = 0;      // east
+    r10 = -sinP * cosL;  r11 = -sinP * sinL;  r12 = cosP;   // north
+    r20 = cosP * cosL;   r21 = cosP * sinL;   r22 = sinP;   // toward viewer
+  }
+
+  // ---- geometry, converted once -----------------------------------------
+  //
+  // Every coastline point becomes a unit vector at load. Those vectors never
+  // change - only the orientation does - so the sines and cosines are paid
+  // for once instead of on every frame. All that is left per frame is three
+  // multiply-adds per point.
+
+  var GEO = [];
+
+  (function buildGeometry() {
+    for (var i = 0; i < WORLD.length; i++) {
+      var rings = WORLD[i].g;
+      var converted = [];
+      for (var j = 0; j < rings.length; j++) {
+        var flat = rings[j];
+        var count = flat.length / 2;
+        var v = new Float32Array(count * 3);
+        for (var k = 0; k < count; k++) {
+          var l = flat[k * 2] * RAD;
+          var p = flat[k * 2 + 1] * RAD;
+          var cosP = Math.cos(p);
+          v[k * 3] = cosP * Math.cos(l);
+          v[k * 3 + 1] = cosP * Math.sin(l);
+          v[k * 3 + 2] = Math.sin(p);
+        }
+        converted.push(v);
+      }
+      GEO.push(converted);
+    }
+    WORLD = null; // the lon/lat copy is dead weight now
+  })();
+
+  var GRATICULE = [];
+
+  (function buildGraticule() {
+    function line(points) {
+      var v = new Float32Array(points.length / 2 * 3);
+      for (var i = 0; i < points.length / 2; i++) {
+        var l = points[i * 2] * RAD;
+        var p = points[i * 2 + 1] * RAD;
+        var cosP = Math.cos(p);
+        v[i * 3] = cosP * Math.cos(l);
+        v[i * 3 + 1] = cosP * Math.sin(l);
+        v[i * 3 + 2] = Math.sin(p);
+      }
+      GRATICULE.push(v);
+    }
+
+    var lon, lat, points;
+    for (lon = -180; lon < 180; lon += 30) {
+      points = [];
+      for (lat = -90; lat <= 90; lat += 3) points.push(lon, lat);
+      line(points);
+    }
+    for (lat = -60; lat <= 60; lat += 30) {
+      points = [];
+      for (lon = -180; lon <= 180; lon += 3) points.push(lon, lat);
+      line(points);
+    }
+  })();
+
+  for (var pi = 0; pi < PLACES.length; pi++) {
+    var pl = PLACES[pi];
+    var pLon = pl.lon * RAD;
+    var pLat = pl.lat * RAD;
+    var pCos = Math.cos(pLat);
+    pl.vx = pCos * Math.cos(pLon);
+    pl.vy = pCos * Math.sin(pLon);
+    pl.vz = Math.sin(pLat);
+  }
+
+  // ---- clipping ---------------------------------------------------------
+
+  var runs = [];
+  var current = null;
+
+  // Depth is a dot product, so it varies linearly along the straight line
+  // between two points: the horizon crossing solves exactly, no searching.
+  function edge(ax, ay, az, ad, bx, by, bz, bd, out) {
+    var t = ad / (ad - bd);
+    var x = ax + (bx - ax) * t;
+    var y = ay + (by - ay) * t;
+    var z = az + (bz - az) * t;
+    var len = Math.sqrt(x * x + y * y + z * z) || 1;
+    x /= len; y /= len; z /= len;
+    out[0] = cx + radius * (x * r00 + y * r01 + z * r02);
+    out[1] = cy - radius * (x * r10 + y * r11 + z * r12);
+  }
+
+  var scratch = [0, 0];
+
+  function clipRing(v) {
+    runs.length = 0;
+    current = null;
+
+    var count = v.length / 3;
+    var last = (count - 1) * 3;
+    var px = v[last], py = v[last + 1], pz = v[last + 2];
+    var pd = px * r20 + py * r21 + pz * r22;
+
+    for (var i = 0; i < count; i++) {
+      var o = i * 3;
+      var x = v[o], y = v[o + 1], z = v[o + 2];
+      var d = x * r20 + y * r21 + z * r22;
+
+      if (d > 0) {
+        if (pd <= 0) {
+          edge(x, y, z, d, px, py, pz, pd, scratch);
+          current = [scratch[0], scratch[1]];
+          runs.push(current);
+        }
+        if (!current) {
+          current = [];
+          runs.push(current);
+        }
+        current.push(
+          cx + radius * (x * r00 + y * r01 + z * r02),
+          cy - radius * (x * r10 + y * r11 + z * r12)
+        );
+      } else if (pd > 0) {
+        edge(px, py, pz, pd, x, y, z, d, scratch);
+        if (current) current.push(scratch[0], scratch[1]);
+        current = null;
+      }
+
+      px = x; py = y; pz = z; pd = d;
+    }
+
+    return runs;
+  }
+
+  function angleAt(x, y) {
+    return Math.atan2(y - cy, x - cx);
+  }
+
+  function limbArc(fromAngle, toAngle) {
+    var delta = ((toAngle - fromAngle + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+    ctx.arc(cx, cy, radius, fromAngle, toAngle, delta < 0);
+  }
+
+  // ---- pin glow, drawn once and stamped ---------------------------------
+
+  // Kept small and faint on purpose: ninety-odd pins sit shoulder to shoulder
+  // across Europe, and a generous glow turns that whole region into one smear.
+  var glowSize = 26;
+  var glowSprite = document.createElement("canvas");
+  glowSprite.width = glowSize;
+  glowSprite.height = glowSize;
+
+  (function () {
+    var g = glowSprite.getContext("2d");
+    var half = glowSize / 2;
+    var gradient = g.createRadialGradient(half, half, 0, half, half, half);
+    gradient.addColorStop(0, "rgba(232, 207, 160, 0.22)");
+    gradient.addColorStop(1, "rgba(232, 207, 160, 0)");
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, glowSize, glowSize);
+  })();
+
+  // ---- drawing ----------------------------------------------------------
+
+  function drawGraticule() {
+    ctx.beginPath();
+    for (var g = 0; g < GRATICULE.length; g++) {
+      var v = GRATICULE[g];
+      var count = v.length / 3;
+      var started = false;
+      for (var i = 0; i < count; i++) {
+        var o = i * 3;
+        var x = v[o], y = v[o + 1], z = v[o + 2];
+        if (x * r20 + y * r21 + z * r22 < 0) { started = false; continue; }
+        var sx = cx + radius * (x * r00 + y * r01 + z * r02);
+        var sy = cy - radius * (x * r10 + y * r11 + z * r12);
+        if (started) ctx.lineTo(sx, sy);
+        else { ctx.moveTo(sx, sy); started = true; }
+      }
+    }
+    ctx.strokeStyle = "#171310";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, size, size);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#050403";
+    ctx.fill();
+
+    drawGraticule();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.clip();
+
+    ctx.fillStyle = "#2A241C";
+    ctx.strokeStyle = "#453A2C";
+    ctx.lineWidth = 0.7;
+
+    for (var i = 0; i < GEO.length; i++) {
+      var rings = GEO[i];
+      var clipped = [];
+
+      for (var j = 0; j < rings.length; j++) {
+        var parts = clipRing(rings[j]);
+        if (parts.length) clipped.push(parts.slice());
+      }
+
+      if (!clipped.length) continue;
+
+      ctx.beginPath();
+      for (var c = 0; c < clipped.length; c++) {
+        var ring = clipped[c];
+        for (var k = 0; k < ring.length; k++) {
+          var run = ring[k];
+          if (k === 0) {
+            ctx.moveTo(run[0], run[1]);
+          } else {
+            var previous = ring[k - 1];
+            limbArc(
+              angleAt(previous[previous.length - 2], previous[previous.length - 1]),
+              angleAt(run[0], run[1])
+            );
+          }
+          for (var m = 2; m < run.length; m += 2) ctx.lineTo(run[m], run[m + 1]);
+        }
+
+        if (ring.length > 1) {
+          var tail = ring[ring.length - 1];
+          limbArc(
+            angleAt(tail[tail.length - 2], tail[tail.length - 1]),
+            angleAt(ring[0][0], ring[0][1])
+          );
+        }
+        ctx.closePath();
+      }
+      ctx.fill("evenodd");
+
+      // Stroke coastlines only, never the horizon arcs that closed them.
+      ctx.beginPath();
+      for (var d = 0; d < clipped.length; d++) {
+        var lines = clipped[d];
+        for (var s = 0; s < lines.length; s++) {
+          var line = lines[s];
+          ctx.moveTo(line[0], line[1]);
+          for (var t = 2; t < line.length; t += 2) ctx.lineTo(line[t], line[t + 1]);
+        }
+      }
+      ctx.stroke();
+    }
+
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = "#3A3025";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    var label = -1;
+    var half = glowSize / 2;
+
+    for (var q = 0; q < PLACES.length; q++) {
+      var place = PLACES[q];
+      var depth = place.vx * r20 + place.vy * r21 + place.vz * r22;
+      place.visible = depth > 0.02;
+      if (!place.visible) continue;
+
+      place.sx = cx + radius * (place.vx * r00 + place.vy * r01 + place.vz * r02);
+      place.sy = cy - radius * (place.vx * r10 + place.vy * r11 + place.vz * r12);
+
+      var lit = q === hovered || q === selected;
+      if (lit) label = q;
+
+      ctx.drawImage(glowSprite, place.sx - half, place.sy - half);
+
+      ctx.beginPath();
+      ctx.arc(place.sx, place.sy, lit ? 4.2 : 2.1, 0, Math.PI * 2);
+      ctx.fillStyle = lit ? "#F6E4C0" : "#E8CFA0";
+      ctx.fill();
+    }
+
+    // One label at a time, drawn last so nothing covers it.
+    if (label >= 0) {
+      var chosen = PLACES[label];
+      ctx.font = "400 12px 'IBM Plex Mono', monospace";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#F6E4C0";
+      ctx.fillText(chosen.name.toUpperCase(), chosen.sx, chosen.sy - 14);
+    }
+  }
+
+  // ---- loop -------------------------------------------------------------
+
+  function tick() {
+    if (!dragging) {
+      if (Math.abs(vlon) > 0.004 || Math.abs(vlat) > 0.004) {
+        clon += vlon;
+        clat = Math.max(-MAX_TILT, Math.min(MAX_TILT, clat + vlat));
+        vlon *= 0.90;
+        vlat *= 0.90;
+      } else if (spinning) {
+        clon += 0.055;
+      }
+    }
+    setOrientation();
+    draw();
+    requestAnimationFrame(tick);
+  }
+
+  // ---- sizing -----------------------------------------------------------
+
+  function resize() {
+    var holder = canvas.parentElement;
+    var available = Math.min(holder.clientWidth, window.innerHeight - 250);
+    size = Math.max(260, Math.min(540, available));
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(size * dpr);
+    canvas.height = Math.round(size * dpr);
+    canvas.style.width = size + "px";
+    canvas.style.height = size + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx = size / 2;
+    cy = size / 2;
+    radius = size / 2 - 12;
+  }
+
+  // ---- interaction ------------------------------------------------------
+
+  function setSpinning(on) {
+    spinning = on;
+    spinToggle.textContent = on ? "Stop rotation" : "Start rotation";
+    spinToggle.setAttribute("aria-pressed", on ? "false" : "true");
+  }
+
+  spinToggle.addEventListener("click", function () {
+    setSpinning(!spinning);
+  });
+
+  function pointAt(ev) {
+    var rect = canvas.getBoundingClientRect();
+    return [ev.clientX - rect.left, ev.clientY - rect.top];
+  }
+
+  function hitTest(x, y) {
+    var best = -1;
+    var bestDistance = 225; // 15px
+    for (var i = 0; i < PLACES.length; i++) {
+      var place = PLACES[i];
+      if (!place.visible) continue;
+      var dx = place.sx - x;
+      var dy = place.sy - y;
+      var distance = dx * dx + dy * dy;
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  canvas.addEventListener("pointerdown", function (ev) {
+    dragging = true;
+    moved = 0;
+    lastX = ev.clientX;
+    lastY = ev.clientY;
+    vlon = 0;
+    vlat = 0;
+    setSpinning(false); // touch it once and it stops drifting under you
+    canvas.classList.add("dragging");
+    canvas.setPointerCapture(ev.pointerId);
+  });
+
+  canvas.addEventListener("pointermove", function (ev) {
+    if (!dragging) {
+      var point = pointAt(ev);
+      var hit = hitTest(point[0], point[1]);
+      if (hit !== hovered) {
+        hovered = hit;
+        canvas.style.cursor = hit >= 0 ? "pointer" : "grab";
+      }
+      return;
+    }
+    var dx = ev.clientX - lastX;
+    var dy = ev.clientY - lastY;
+    moved += Math.abs(dx) + Math.abs(dy);
+    lastX = ev.clientX;
+    lastY = ev.clientY;
+
+    vlon = -dx * 0.28;
+    vlat = dy * 0.28;
+    clon += vlon;
+    clat = Math.max(-MAX_TILT, Math.min(MAX_TILT, clat + vlat));
+  });
+
+  function endDrag(ev) {
+    if (!dragging) return;
+    dragging = false;
+    canvas.classList.remove("dragging");
+    if (moved < 6) {
+      var point = pointAt(ev);
+      var hit = hitTest(point[0], point[1]);
+      if (hit >= 0) open(hit);
+    }
+  }
+
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
+
+  // ---- panel ------------------------------------------------------------
+
+  var titleEl = document.getElementById("panel-title");
+  var coordsEl = document.getElementById("panel-coords");
+  var framesEl = document.getElementById("panel-frames");
+  var DEGREE = String.fromCharCode(176);
+
+  function format(value, positive, negative) {
+    return Math.abs(value).toFixed(2) + DEGREE + " " + (value >= 0 ? positive : negative);
+  }
+
+  function open(i) {
+    var place = PLACES[i];
+    selected = i;
+    setSpinning(false);
+    vlon = 0;
+    vlat = 0;
+
+    titleEl.textContent = place.name;
+    coordsEl.textContent = format(place.lat, "N", "S") + "  /  " + format(place.lon, "E", "W");
+
+    framesEl.textContent = "";
+    var count = place.photos.length || 1;
+    for (var f = 0; f < count; f++) {
+      var frame = document.createElement("div");
+      frame.className = "frame";
+      if (place.photos[f]) {
+        var img = document.createElement("img");
+        img.src = place.photos[f];
+        img.alt = place.name;
+        img.loading = "lazy";
+        frame.appendChild(img);
+      } else {
+        frame.textContent = "Photo pending";
+      }
+      framesEl.appendChild(frame);
+    }
+
+    panel.setAttribute("data-open", "true");
+    panel.setAttribute("aria-hidden", "false");
+
+    var buttons = indexList.querySelectorAll("button");
+    for (var b = 0; b < buttons.length; b++) {
+      buttons[b].setAttribute("aria-current", b === i ? "true" : "false");
+    }
+
+    // Turn to face the place, the short way round the world.
+    var startLon = clon;
+    var startLat = clat;
+    var deltaLon = ((place.lon - startLon + 540) % 360) - 180;
+    var deltaLat = Math.max(-MAX_TILT, Math.min(MAX_TILT, place.lat)) - startLat;
+
+    if (reduced) {
+      clon = startLon + deltaLon;
+      clat = startLat + deltaLat;
+      return;
+    }
+
+    var steps = 26;
+    var step = 0;
+    (function glide() {
+      step++;
+      var eased = 1 - Math.pow(1 - step / steps, 3);
+      clon = startLon + deltaLon * eased;
+      clat = startLat + deltaLat * eased;
+      if (step < steps && !dragging) requestAnimationFrame(glide);
+    })();
+  }
+
+  function close() {
+    panel.setAttribute("data-open", "false");
+    panel.setAttribute("aria-hidden", "true");
+    selected = -1;
+    var buttons = indexList.querySelectorAll("button");
+    for (var b = 0; b < buttons.length; b++) buttons[b].setAttribute("aria-current", "false");
+  }
+
+  document.getElementById("panel-close").addEventListener("click", close);
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") close();
+  });
+
+  // ---- index ------------------------------------------------------------
+
+  PLACES.forEach(function (place, i) {
+    var li = document.createElement("li");
+    var button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("aria-current", "false");
+
+    var n = document.createElement("span");
+    n.className = "n";
+    n.textContent = String(i + 1).padStart(2, "0");
+
+    button.appendChild(n);
+    button.appendChild(document.createTextNode(place.name));
+    button.addEventListener("click", function () { open(i); });
+    button.addEventListener("mouseenter", function () { hovered = i; });
+    button.addEventListener("mouseleave", function () { hovered = -1; });
+
+    li.appendChild(button);
+    indexList.appendChild(li);
+  });
+
+  document.getElementById("count").textContent = PLACES.length + " places";
+  document.getElementById("index-count").textContent = PLACES.length;
+
+  window.addEventListener("resize", resize);
+
+  resize();
+  setSpinning(!reduced);
+  tick();
+
+  requestAnimationFrame(function () {
+    document.documentElement.classList.add("ready");
+  });
+}
+
+// The world outline and the place list are separate files so both can be
+// edited (or regenerated by the photo importer) without touching this page.
+Promise.all([
+  fetch("world.json").then(function (r) { return r.json(); }),
+  fetch("places.json").then(function (r) { return r.json(); })
+]).then(function (data) {
+  startGlobe(data[0], data[1]);
+}).catch(function (error) {
+  var holder = document.querySelector(".globe-holder");
+  if (holder) {
+    holder.textContent = "The map data could not be loaded.";
+    holder.style.fontFamily = "var(--mono)";
+    holder.style.fontSize = "0.75rem";
+    holder.style.color = "var(--ink-faint)";
+  }
+  console.error(error);
+});
+</script>
+
+</body>
+</html>
