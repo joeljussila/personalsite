@@ -643,7 +643,10 @@ function startGlobe(WORLD, PLACES) {
       ctx.drawImage(glowSprite, place.sx - half, place.sy - half);
 
       ctx.beginPath();
-      ctx.arc(place.sx, place.sy, lit ? 4.2 : 2.1, 0, Math.PI * 2);
+      // 20% smaller than they were, so neighbouring places stay distinct
+      // where they cluster. The hit area is unchanged, so they are no
+      // harder to click.
+      ctx.arc(place.sx, place.sy, lit ? 3.36 : 1.68, 0, Math.PI * 2);
       ctx.fillStyle = lit ? "#F6E4C0" : "#E8CFA0";
       ctx.fill();
     }
