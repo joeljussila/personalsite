@@ -508,7 +508,7 @@ function startGlobe(WORLD, PLACES) {
 
   // Kept small and faint on purpose: ninety-odd pins sit shoulder to shoulder
   // across Europe, and a generous glow turns that whole region into one smear.
-  var glowSize = 26;
+  var glowSize = 22;
   var glowSprite = document.createElement("canvas");
   glowSprite.width = glowSize;
   glowSprite.height = glowSize;
@@ -517,7 +517,7 @@ function startGlobe(WORLD, PLACES) {
     var g = glowSprite.getContext("2d");
     var half = glowSize / 2;
     var gradient = g.createRadialGradient(half, half, 0, half, half, half);
-    gradient.addColorStop(0, "rgba(232, 207, 160, 0.22)");
+    gradient.addColorStop(0, "rgba(232, 207, 160, 0.18)");
     gradient.addColorStop(1, "rgba(232, 207, 160, 0)");
     g.fillStyle = gradient;
     g.fillRect(0, 0, glowSize, glowSize);
