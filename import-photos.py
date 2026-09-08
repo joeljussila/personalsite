@@ -30,15 +30,29 @@ MANUAL = {
     "IMG_8319.jpeg": "Merzouga",
 }
 
-MAX_EDGE = 1600      # long edge in pixels
+MAX_EDGE = 1200      # long edge in pixels
 QUALITY = 82
 MAX_PER_PLACE = 3    # the panel shows at most three frames
 MATCH_KM = 75        # how far a photo may sit from a place centre
-CROP = (4, 3)        # the panel frames are 4:3 and crop to fill either way
-TONE = "warm"        # "colour", "grey", or "warm" (monochrome toned to the ink)
+CROP = (1, 1)        # the panel frames are square and crop to fill either way
+TONE = "colour"      # "colour", "grey", or "warm" (monochrome toned to the ink)
+CENTRE_PULL = 0.5    # how strongly the crop is drawn back to the middle
 
 GROUND = (10, 9, 8)          # --ground, the black point of the warm tone
 INK = (232, 207, 160)        # --ink, the white point
+
+# Crops that the detail search gets wrong, as a fraction along the long axis:
+# 0.0 is hard top or left, 0.5 the middle, 1.0 hard bottom or right.
+FRAMING = {
+    "IMG_4243.jpeg": 0.50,   # the busy far bank pulled the crop down over their heads
+    "IMG_0537.jpeg": 0.35,   # keep the raised arm and the horizon, lose some shingle
+    "IMG_2545.jpeg": 0.50,   # Athens: the doorway sits at half width, so centre on it
+    "IMG_2843.jpeg": 0.08,   # Cartagena: down, to close the top of the banner
+    "IMG_9273.jpeg": 0.08,   # Kyoto: down, for the painted beams over the gate
+    "IMG_4472.jpeg": 0.28,   # Lago Maggiore: up, off the ceiling and onto the window
+    "IMG_0495.jpeg": 0.90,   # Las Vegas: up, less empty sky over the strip
+    "IMG_4909.jpeg": 0.70,   # Milan: down, to trade some floor for the vaulting
+}
 
 from PIL import Image, ImageOps
 try:
@@ -47,17 +61,72 @@ try:
 except ImportError:
     print("note: pillow-heif missing, HEIC files will be skipped\n")
 
+import numpy
 
-def crop_to(image, ratio):
-    """Centre-crop to an aspect ratio, taking the cut off the long side."""
+
+def focus(image, keep, horizontal):
+    """How far along the long axis to take the crop from, as 0.0 to 1.0.
+
+    A photograph is rarely most interesting through the middle: a phone
+    picture is usually sky above a subject, or a subject above a foreground,
+    and a centre crop lands on the dull band between them. So slide the
+    window along the long axis and keep the position holding the most edge
+    detail, pulled back towards the centre so that a marginal win at the very
+    edge does not decapitate anybody.
+
+    This only ever nudges. It is a reasonable default for photographs added
+    later; the ones already here were looked at, and anything it framed badly
+    is corrected by hand in FRAMING above.
+    """
+    small = ImageOps.grayscale(image.copy())
+    small.thumbnail((320, 320), Image.BILINEAR)
+    pixels = numpy.asarray(small, dtype=numpy.float32)
+
+    # Edge detail: sky and blank walls score nothing, faces and railings score.
+    energy = numpy.zeros_like(pixels)
+    energy[:, :-1] += numpy.abs(numpy.diff(pixels, axis=1))
+    energy[:-1, :] += numpy.abs(numpy.diff(pixels, axis=0))
+
+    profile = energy.sum(axis=0) if horizontal else energy.sum(axis=1)
+    span = len(profile)
+    window = max(1, round(span * keep / (image.width if horizontal else image.height)))
+    if window >= span:
+        return 0.5
+
+    totals = numpy.cumsum(numpy.concatenate(([0.0], profile)))
+    scores = totals[window:] - totals[:-window]
+
+    # Detail is spread fairly evenly across most photographs, so the centre
+    # pull has to be measured against how much the score actually varies. Held
+    # against the raw totals it simply wins everywhere and every crop is
+    # central, which is the thing this function exists to avoid.
+    spread = float(scores.max() - scores.min())
+    if spread <= 0:
+        return 0.5
+    scores = (scores - scores.min()) / spread
+
+    # Positions run 0..1; an off-centre crop has to earn its place.
+    positions = numpy.linspace(0.0, 1.0, len(scores))
+    scores = scores - CENTRE_PULL * numpy.abs(positions - 0.5) * 2.0
+    return float(positions[int(numpy.argmax(scores))])
+
+
+def crop_to(image, ratio, at=None):
+    """Crop to an aspect ratio, taking the cut off the long side.
+
+    `at` is where along that side to take it, 0.0 to 1.0; without one the
+    interesting part is found by looking at the picture.
+    """
     width, height = image.size
     target = ratio[0] / ratio[1]
     if width / height > target:
         keep = round(height * target)
-        left = (width - keep) // 2
+        where = focus(image, keep, True) if at is None else at
+        left = round((width - keep) * where)
         return image.crop((left, 0, left + keep, height))
     keep = round(width / target)
-    top = (height - keep) // 2
+    where = focus(image, keep, False) if at is None else at
+    top = round((height - keep) * where)
     return image.crop((0, top, width, top + keep))
 
 
@@ -128,12 +197,20 @@ def write_places(places):
 
 def main():
     dry = "--dry-run" in sys.argv
+    force = "--force" in sys.argv       # redo the lot, e.g. after changing CROP
     if not INBOX.is_dir():
         sys.exit(f"inbox not found: {INBOX}")
 
     places = json.loads(PLACES.read_text(encoding="utf-8"))
     PHOTOS.mkdir(parents=True, exist_ok=True)
     ledger = json.loads(LEDGER.read_text(encoding="utf-8")) if LEDGER.exists() else {}
+
+    if force and not dry:
+        for stale in PHOTOS.glob("*.webp"):
+            stale.unlink()
+        for place in places:
+            place["photos"] = []
+        ledger = {}
 
     files = sorted(
         f for f in INBOX.rglob("*")
@@ -186,7 +263,8 @@ def main():
         target = PHOTOS / f"{stem}-{len(place['photos']) + 1}.webp"
 
         if not dry:
-            frame = tone(crop_to(ImageOps.exif_transpose(image), CROP), TONE)
+            upright = ImageOps.exif_transpose(image)
+            frame = tone(crop_to(upright, CROP, FRAMING.get(path.name)), TONE)
             frame.thumbnail((MAX_EDGE, MAX_EDGE), Image.LANCZOS)
             frame.save(target, "WEBP", quality=QUALITY, method=6)
 
