@@ -8,10 +8,12 @@
 
   # The site is self-contained apart from Google Fonts. Everything else
   # is locked to this origin, so an injected script has nowhere to phone
+  # home to. cloudflareinsights.com is the analytics beacon Cloudflare
+  # injects on its own — without it here the CSP blocks your own analytics.
   # home to. 'unsafe-inline' is required because the styles and the globe
   # live in inline blocks — hashes would have to be recomputed on every
   # edit, which would break "open a file, edit it, push it".
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
 
   # No MIME sniffing, no framing, no leaking full URLs to other sites.
   X-Content-Type-Options: nosniff
