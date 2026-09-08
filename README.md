@@ -9,11 +9,21 @@ it, push it.
 ```
 index.html            the front page
 favicon.svg           the tab icon
+_headers              response headers Cloudflare Pages applies at the edge
+robots.txt            crawler rules, points at the sitemap
+sitemap.xml           the two pages, for crawlers
 places/
   index.html          the globe page (markup, styles, and the globe itself)
   places.json         the list of places  <- edit this one
   world.json          country outlines, generated (see below)
 ```
+
+`_headers` sets HSTS, a content security policy, and the rest of the usual
+hardening. The policy allows inline `<style>` and `<script>` because the
+styles and the globe live in the pages themselves — hashing them would mean
+recomputing a hash on every edit, which is the opposite of the point. If you
+ever add a script or a stylesheet from a new domain, add it there too or the
+browser will refuse to load it.
 
 ## Editing
 
