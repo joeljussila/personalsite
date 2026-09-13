@@ -18,7 +18,6 @@ ground.webp           the ink wash behind every page
 favicon.svg           the tab icon
 vercel.json           redirects and response headers Vercel applies at the edge
 .vercelignore         files that live here but are not part of the deployment
-_headers              the same headers for Cloudflare Pages (kept until cutover)
 robots.txt            crawler rules, points at the sitemap
 sitemap.xml           the three pages, for crawlers
 places/
@@ -144,9 +143,10 @@ URLs have no extension: `cleanUrls` in `vercel.json` serves `map.html` at
 `/map`, and `/map.html` redirects to it. Link to `/map`, `/blog` and
 `/posts/<slug>`, and write the canonical the same way.
 
-Headers live in `vercel.json`. Vercel does not read `_headers` (that is a
-Cloudflare Pages file), so the two have to be kept in step for as long as both
-platforms are live. Once the domain is served by Vercel, delete `_headers`.
+Headers live in `vercel.json` — HSTS, the content security policy, the rest of
+the usual hardening, and a year-long immutable cache on the photographs.
+Cloudflare is out of the serving path entirely now; it keeps the domain and
+the DNS and nothing else.
 
 ### Moving the domain
 
