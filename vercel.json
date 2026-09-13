@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "trailingSlash": true,
+  "cleanUrls": true,
   "redirects": [
-    { "source": "/places", "destination": "/map.html", "permanent": true },
-    { "source": "/places/", "destination": "/map.html", "permanent": true },
-    { "source": "/places/index.html", "destination": "/map.html", "permanent": true }
+    { "source": "/places", "destination": "/map", "permanent": true },
+    { "source": "/places/", "destination": "/map", "permanent": true },
+    { "source": "/places/index.html", "destination": "/map", "permanent": true }
   ],
   "headers": [
     {

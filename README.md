@@ -102,7 +102,7 @@ never roll over a pole and come back upside down.
 `Globe.hover(i)`, `Globe.clear()` and `Globe.onSelect(fn)`. Clicking a place
 in the list turns the globe to face it; clicking a mark on the globe opens the
 same panel and scrolls the list to it. Both write the place into the address
-bar, so `/map.html#kyoto` opens Kyoto.
+bar, so `/map#kyoto` opens Kyoto.
 
 ### Regenerating `world.json`
 
@@ -139,6 +139,10 @@ Then visit http://localhost:8000.
 Vercel, connected to this repository. Framework preset **Other**, no build
 command, output directory `.` — the files are the site. Every push to `main`
 deploys; every other branch gets a preview URL.
+
+URLs have no extension: `cleanUrls` in `vercel.json` serves `map.html` at
+`/map`, and `/map.html` redirects to it. Link to `/map`, `/blog` and
+`/posts/<slug>`, and write the canonical the same way.
 
 Headers live in `vercel.json`. Vercel does not read `_headers` (that is a
 Cloudflare Pages file), so the two have to be kept in step for as long as both
