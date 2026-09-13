@@ -32,6 +32,7 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
    boxes is not enough: the panel drops by the heading's own cap offset so the
    P of PLACES sits on the same line as the M of Map. */
 .panel{margin-top:calc(var(--h1) * var(--h1-cap) - 4px)}
+@media (min-width:821px){.map{margin-top:1cm}}
 #globe{width:100%;max-width:400px;height:auto;aspect-ratio:1;touch-action:none;cursor:grab}
 #globe.over-mark{cursor:pointer}
 #globe.dragging{cursor:grabbing}
@@ -74,7 +75,7 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
  .page{height:auto}
  /* The page scrolls on a phone, so the wash is pinned to the window and the
     text slides over it rather than travelling with it. */
- .ground{position:fixed}
+ .ground{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
  .body{padding:40px 30px 32px;justify-content:flex-start;min-height:auto}
  h1{--h1:40px;margin-bottom:26px}
  .cap::first-letter{font-size:60px;margin-right:10px}
@@ -93,10 +94,10 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
  .post-row{grid-template-columns:1fr;gap:8px}
  .post-row .date{text-align:left;padding-top:0;order:-1}
  .post-row .title{font-size:26px}
- .g-home{left:38%;right:-58%;top:48%;bottom:-30%;opacity:.62;-webkit-mask-image:radial-gradient(ellipse 60% 56% at 42% 40%,#000 6%,rgba(0,0,0,.5) 44%,transparent 86%);mask-image:radial-gradient(ellipse 60% 56% at 42% 40%,#000 6%,rgba(0,0,0,.5) 44%,transparent 86%)}
- .g-map{left:-56%;right:42%;top:52%;bottom:-32%;opacity:.56;-webkit-mask-image:radial-gradient(ellipse 58% 56% at 62% 42%,#000 6%,rgba(0,0,0,.5) 44%,transparent 86%);mask-image:radial-gradient(ellipse 58% 56% at 62% 42%,#000 6%,rgba(0,0,0,.5) 44%,transparent 86%)}
- .g-blog{left:34%;right:-60%;top:-18%;bottom:58%;opacity:.6;-webkit-mask-image:radial-gradient(ellipse 58% 58% at 44% 62%,#000 6%,rgba(0,0,0,.5) 44%,transparent 86%);mask-image:radial-gradient(ellipse 58% 58% at 44% 62%,#000 6%,rgba(0,0,0,.5) 44%,transparent 86%)}
- .g-post{left:-58%;right:38%;top:58%;bottom:-32%;opacity:.52;-webkit-mask-image:radial-gradient(ellipse 58% 54% at 64% 38%,#000 6%,rgba(0,0,0,.5) 44%,transparent 86%);mask-image:radial-gradient(ellipse 58% 54% at 64% 38%,#000 6%,rgba(0,0,0,.5) 44%,transparent 86%)}
+ .g-home{inset:0;opacity:0.46;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 74% 76%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 74% 76%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
+ .g-map{inset:0;opacity:0.40;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 24% 74%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 24% 74%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
+ .g-blog{inset:0;opacity:0.44;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 76% 26%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 76% 26%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
+ .g-post{inset:0;opacity:0.38;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 24% 72%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 24% 72%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .empty{font-style:italic;font-size:18px;line-height:1.85;margin:0}
