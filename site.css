@@ -79,7 +79,12 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
     you see where the ink stops. The box is bigger than the window instead, and
     the crop throws the image's own edges off-screen; the fade is a gradient
     down the visible band, so the ink runs off the bottom and the sides. */
- .ground{position:fixed;left:-35%;top:-30%;right:auto;bottom:auto;width:170%;height:170%;object-fit:cover}
+ /* Never a percentage height here: on iOS Safari a fixed element's percentage
+    resolves against the small viewport - the screen minus the toolbars - so the
+    plate stopped about a toolbar's height above the bottom of the screen. lvh is
+    the large viewport, the tallest the page area ever gets; dvh is a floor under
+    it. The 24px is a hairline guard and shifts the mask by well under a percent. */
+ .ground{position:fixed;left:0;top:-12px;right:auto;bottom:auto;width:100vw;height:calc(100vh + 24px);min-height:calc(100dvh + 24px);object-fit:cover;object-position:center}
  .body{padding:40px 30px 32px;justify-content:flex-start;min-height:auto}
  h1{--h1:40px;margin-bottom:26px}
  .cap::first-letter{font-size:60px;margin-right:10px}
@@ -98,10 +103,10 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
  .post-row{grid-template-columns:1fr;gap:8px}
  .post-row .date{text-align:left;padding-top:0;order:-1}
  .post-row .title{font-size:26px}
- .g-home{opacity:0.36;object-position:62% center;-webkit-mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%);mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%)}
- .g-map{opacity:0.28;object-position:34% center;-webkit-mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%);mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%)}
- .g-blog{opacity:0.32;object-position:64% center;-webkit-mask-image:linear-gradient(to bottom,#000 30%,rgba(0,0,0,.5) 42%,transparent 56%);mask-image:linear-gradient(to bottom,#000 30%,rgba(0,0,0,.5) 42%,transparent 56%)}
- .g-post{opacity:0.26;object-position:34% center;-webkit-mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%);mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%)}
+ .g-home{opacity:0.46;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 74% 76%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 74% 76%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
+ .g-map{opacity:0.40;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 24% 74%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 24% 74%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
+ .g-blog{opacity:0.44;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 76% 26%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 76% 26%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
+ .g-post{opacity:0.38;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 24% 72%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 24% 72%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .empty{font-style:italic;font-size:18px;line-height:1.85;margin:0}
@@ -128,3 +133,7 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
  #globe{max-width:min(400px,calc(100vh - 250px))}
  .folio{height:56px}
 }
+
+@media (max-width:820px){@supports (height:100lvh){
+ .ground{height:calc(100lvh + 24px)}
+}}
