@@ -3,6 +3,7 @@
   "trailingSlash": true,
   "redirects": [
     { "source": "/places", "destination": "/map.html", "permanent": true },
+    { "source": "/places/", "destination": "/map.html", "permanent": true },
     { "source": "/places/index.html", "destination": "/map.html", "permanent": true }
   ],
   "headers": [
