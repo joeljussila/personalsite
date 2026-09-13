@@ -75,7 +75,11 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
  .page{height:auto}
  /* The page scrolls on a phone, so the wash is pinned to the window and the
     text slides over it rather than travelling with it. */
- .ground{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+ /* The plate is a blot with transparent margins, so at the window's exact size
+    you see where the ink stops. The box is bigger than the window instead, and
+    the crop throws the image's own edges off-screen; the fade is a gradient
+    down the visible band, so the ink runs off the bottom and the sides. */
+ .ground{position:fixed;left:-35%;top:-30%;right:auto;bottom:auto;width:170%;height:170%;object-fit:cover}
  .body{padding:40px 30px 32px;justify-content:flex-start;min-height:auto}
  h1{--h1:40px;margin-bottom:26px}
  .cap::first-letter{font-size:60px;margin-right:10px}
@@ -94,10 +98,10 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
  .post-row{grid-template-columns:1fr;gap:8px}
  .post-row .date{text-align:left;padding-top:0;order:-1}
  .post-row .title{font-size:26px}
- .g-home{inset:0;opacity:0.46;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 74% 76%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 74% 76%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
- .g-map{inset:0;opacity:0.40;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 24% 74%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 24% 74%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
- .g-blog{inset:0;opacity:0.44;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 76% 26%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 76% 26%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
- .g-post{inset:0;opacity:0.38;-webkit-mask-image:radial-gradient(ellipse 86% 56% at 24% 72%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%);mask-image:radial-gradient(ellipse 86% 56% at 24% 72%,#000 4%,rgba(0,0,0,.5) 46%,transparent 92%)}
+ .g-home{opacity:0.36;object-position:62% center;-webkit-mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%);mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%)}
+ .g-map{opacity:0.28;object-position:34% center;-webkit-mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%);mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%)}
+ .g-blog{opacity:0.32;object-position:64% center;-webkit-mask-image:linear-gradient(to bottom,#000 30%,rgba(0,0,0,.5) 42%,transparent 56%);mask-image:linear-gradient(to bottom,#000 30%,rgba(0,0,0,.5) 42%,transparent 56%)}
+ .g-post{opacity:0.26;object-position:34% center;-webkit-mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%);mask-image:linear-gradient(to bottom,transparent 17%,rgba(0,0,0,.45) 32%,#000 50%)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .empty{font-style:italic;font-size:18px;line-height:1.85;margin:0}
