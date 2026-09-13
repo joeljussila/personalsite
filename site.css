@@ -1,15 +1,15 @@
-:root{--paper:#EFE9DA;--ink:#1C3468;--oxide:#8A3B2A}
+:root{--paper:#EFE9DA;--ink:#1C3468;--oxide:#8A3B2A;--h1:64px;--h1-cap:0.2253}
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{min-height:100vh;background:var(--paper);color:var(--ink);font-family:"EB Garamond",Georgia,serif;-webkit-font-smoothing:antialiased}
 img{display:block;max-width:100%}
 a{color:var(--ink)}
-.page{position:relative;min-height:100vh;overflow:hidden;display:flex;flex-direction:column}
-@supports (min-height:100dvh){.page{min-height:100dvh}}
+.page{position:relative;min-height:100vh;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+@supports (min-height:100dvh){.page{min-height:100dvh;height:100dvh}}
 .ground{position:absolute;object-fit:cover;pointer-events:none;z-index:0;max-width:none}
-.body{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;padding:72px 96px 48px}
+.body{position:relative;z-index:1;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;padding:72px 96px 48px}
 .mono{font-family:"IBM Plex Mono",monospace;font-weight:300;font-size:12px;letter-spacing:.3em;text-transform:uppercase}
-h1{font-weight:400;font-size:64px;line-height:1.06;margin:0 0 36px}
+h1{font-weight:400;font-size:var(--h1);line-height:1.06;margin:0 0 36px}
 h2{font-weight:400;font-size:30px;line-height:1.14;margin:18px 0 16px}
 p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22px}
 .measure{width:100%;max-width:544px}
@@ -25,15 +25,23 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
 .folio a{text-decoration:none;padding-bottom:3px;border-bottom:1px solid transparent;transition:transform .22s ease,border-color .22s ease,color .22s ease}
 .folio a:hover,.folio a:focus-visible,.folio a[aria-current]{border-bottom-color:var(--oxide);color:var(--oxide)}
 .folio a:hover,.folio a:focus-visible{transform:translateY(-2px)}
-.map{display:grid;grid-template-columns:1fr 400px;gap:64px;align-items:start}
-.map-main{min-width:0}
+.map{display:grid;grid-template-columns:1fr 400px;gap:64px;align-items:stretch;flex:1;min-height:0}
+.map-main{min-width:0;display:flex;flex-direction:column;min-height:0}
 .map-main h1{margin-bottom:36px}
+/* The index head is small caps and the heading is 64px serif, so matching the
+   boxes is not enough: the panel drops by the heading's own cap offset so the
+   P of PLACES sits on the same line as the M of Map. */
+.panel{margin-top:calc(var(--h1) * var(--h1-cap) - 4px)}
 #globe{width:100%;max-width:400px;height:auto;aspect-ratio:1;touch-action:none;cursor:grab}
 #globe.over-mark{cursor:pointer}
 #globe.dragging{cursor:grabbing}
-.panel{position:relative;min-height:440px}
+.panel{position:relative;min-height:0;display:flex;flex-direction:column}
+#index-view{flex:1;min-height:0;display:flex;flex-direction:column}
 .index-head{display:block;padding-bottom:14px;border-bottom:1px solid rgba(28,52,104,.35)}
-.index{max-height:440px;overflow-y:auto}
+.index{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(28,52,104,.28) transparent}
+.index::-webkit-scrollbar{width:6px}
+.index::-webkit-scrollbar-track{background:transparent}
+.index::-webkit-scrollbar-thumb{background:rgba(28,52,104,.28);border-radius:3px}
 .index a{display:block;padding:11px 0;border-bottom:1px solid rgba(28,52,104,.14);font-size:18px;text-decoration:none;transition:padding-left .25s ease}
 .index a:hover,.index a:focus-visible{padding-left:10px}
 .index a[aria-current]{color:var(--oxide);padding-left:10px}
@@ -42,8 +50,11 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
 .detail-head{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:14px;border-bottom:1px solid rgba(28,52,104,.35)}
 .detail-head a{text-decoration:none;border-bottom:1px solid var(--ink)}
 .detail .folio{display:none}
-.plates{display:grid;grid-template-columns:1fr 1fr;gap:14px;overflow-y:auto;align-content:start}
-.plates[data-count="1"]{grid-template-columns:1fr}
+.plates{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:0;overflow:hidden;align-content:start}
+.plates[data-count="1"]{grid-template-columns:1fr;align-content:start;justify-items:start}
+/* The photographs are square. One of them fits the space it has rather than
+   scrolling inside it, and stays square so nothing is cropped away. */
+.plates[data-count="1"] img{width:auto;height:auto;max-width:100%;max-height:100%;aspect-ratio:1;align-self:start}
 .plates[data-count="3"] img:first-child{grid-column:1 / -1;aspect-ratio:2}
 .plates img{width:100%;aspect-ratio:1;object-fit:cover;background:rgba(28,52,104,.08)}
 .posts{width:100%;max-width:640px;display:flex;flex-direction:column}
@@ -60,13 +71,21 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
 .g-blog{left:56%;right:-28%;top:4%;bottom:-42%;opacity:.46;-webkit-mask-image:radial-gradient(ellipse 58% 60% at 52% 48%,#000 8%,rgba(0,0,0,.5) 48%,transparent 88%);mask-image:radial-gradient(ellipse 58% 60% at 52% 48%,#000 8%,rgba(0,0,0,.5) 48%,transparent 88%)}
 .g-post{left:58%;right:-30%;top:-20%;bottom:14%;opacity:.38;-webkit-mask-image:radial-gradient(ellipse 56% 58% at 50% 54%,#000 8%,rgba(0,0,0,.45) 48%,transparent 88%);mask-image:radial-gradient(ellipse 56% 58% at 50% 54%,#000 8%,rgba(0,0,0,.45) 48%,transparent 88%)}
 @media (max-width:820px){
- .body{padding:40px 30px 32px;justify-content:flex-start}
- h1{font-size:40px;margin-bottom:26px}
+ .page{height:auto}
+ /* The page scrolls on a phone, so the wash is pinned to the window and the
+    text slides over it rather than travelling with it. */
+ .ground{position:fixed}
+ .body{padding:40px 30px 32px;justify-content:flex-start;min-height:auto}
+ h1{--h1:40px;margin-bottom:26px}
  .cap::first-letter{font-size:60px;margin-right:10px}
- .map{grid-template-columns:1fr;gap:28px}
- .panel{min-height:0}
+ .map{grid-template-columns:1fr;gap:28px;flex:none;min-height:auto}
+ .panel{min-height:0;margin-top:0}
+ #index-view{display:block}
+ .index{flex:none;max-height:440px}
  .detail{position:fixed;inset:0;z-index:5;padding:40px 30px 96px;overflow-y:auto}
- .plates{grid-template-columns:1fr;overflow:visible}
+ .plates{grid-template-columns:1fr;overflow:visible;flex:none}
+ .plates[data-count="1"]{grid-template-rows:auto;align-content:start}
+ .plates[data-count="1"] img{width:100%;height:auto;max-height:none;aspect-ratio:1}
  .plates[data-count="3"] img:first-child{grid-column:auto;aspect-ratio:1}
  .detail .folio{display:flex;position:static;height:auto;padding:34px 0 12px;margin-top:8px}
  body.detail-open > .page > .folio{display:none}
@@ -81,3 +100,26 @@ p{font-size:18px;line-height:1.85;text-align:justify;hyphens:auto;margin:0 0 22p
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .empty{font-style:italic;font-size:18px;line-height:1.85;margin:0}
+
+/* A short window still has to hold the whole page, because the page is exactly
+   one window tall. The rhythm tightens rather than the content spilling. */
+@media (min-width:821px) and (max-height:880px){
+ :root{--h1:54px}
+ .body{padding-top:44px;padding-bottom:28px}
+ h1{margin-bottom:24px}
+ .map-main h1{margin-bottom:24px}
+ p{margin-bottom:16px}
+ .doors{margin-bottom:28px}
+ .door{padding:14px 0}
+}
+@media (min-width:821px) and (max-height:720px){
+ :root{--h1:44px}
+ .body{padding-top:32px;padding-bottom:20px}
+ h1{margin-bottom:18px}
+ .map-main h1{margin-bottom:18px}
+ .door{padding:10px 0}
+ .doors{margin-bottom:20px}
+ .elsewhere{gap:24px}
+ #globe{max-width:min(400px,calc(100vh - 250px))}
+ .folio{height:56px}
+}
