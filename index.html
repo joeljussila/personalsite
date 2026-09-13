@@ -1,8 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Joel Jussila</title>
 <meta name="description" content="Curious about the world from first principles. Former national-level athlete, engineer by training.">
@@ -17,245 +17,37 @@
 <meta name="twitter:title" content="Joel Jussila">
 <meta name="twitter:description" content="Curious about the world from first principles. Former national-level athlete, engineer by training.">
 
-<meta name="theme-color" content="#0A0908">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#EFE9DA">
+<meta name="color-scheme" content="light">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400&family=Inter+Tight:wght@300;400&family=Newsreader:opsz,wght@6..72,200;6..72,300&display=swap">
-
-<style>
-  :root{
-    --ground: #0A0908;
-    --ink: #E8CFA0;
-    --ink-body: #DCC08E;
-    --ink-dim: #A78D63;
-    --ink-faint: #6B5A45;
-    --rule: #2A241C;
-    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  body{
-    margin: 0;
-    min-height: 100svh;
-    background: var(--ground);
-    color: var(--ink-body);
-    font-family: "Inter Tight", system-ui, -apple-system, sans-serif;
-    font-weight: 300;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    display: grid;
-    place-content: center;
-    place-items: center;
-    padding: clamp(1.75rem, 7vw, 4rem);
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  .grain{
-    position: fixed;
-    inset: 0;
-    opacity: 0.5;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  main{
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 34rem;
-    animation: rise 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
-  }
-
-  @keyframes rise{
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  h1{
-    font-family: Newsreader, Georgia, "Times New Roman", serif;
-    font-weight: 200;
-    font-size: clamp(2rem, 6vw, 2.5rem);
-    line-height: 1.15;
-    letter-spacing: 0.005em;
-    color: var(--ink);
-    margin: 0 0 1.75rem;
-  }
-
-  .bio{
-    font-size: 0.9375rem;
-    line-height: 1.9;
-    color: var(--ink-body);
-    margin: 0 0 2.25rem;
-  }
-
-  .links{
-    list-style: none;
-    margin: 0;
-    padding: 1.5rem 0 0;
-    border-top: 1px solid var(--rule);
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  .links a{
-    display: flex;
-    align-items: baseline;
-    gap: 1.1rem;
-    padding: 0.55rem 0;
-    font-size: 0.8125rem;
-    font-weight: 300;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--ink-dim);
-    transition: color 0.35s ease;
-  }
-
-  .links .n{
-    font-family: var(--mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.1em;
-    color: var(--ink-faint);
-    font-variant-numeric: tabular-nums;
-    transition: color 0.35s ease;
-  }
-
-  .links a:hover{ color: var(--ink); }
-  .links a:hover .n{ color: var(--ink-dim); }
-
-  .links a:focus-visible{
-    outline: 1px solid var(--ink-dim);
-    outline-offset: 4px;
-    color: var(--ink);
-  }
-
-  /* The one thing on the page asking to be clicked, so it gets an edge to
-     click on. Everything else stays unboxed. */
-  .onward{
-    margin: 0 0 2.5rem;
-  }
-
-  .onward a{
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.9rem;
-    padding: 0.85rem 1.35rem;
-    border: 1px solid var(--ink-faint);
-    font-family: Newsreader, Georgia, "Times New Roman", serif;
-    font-weight: 300;
-    font-size: 1.0625rem;
-    letter-spacing: 0.005em;
-    text-decoration: none;
-    color: var(--ink-body);
-    transition: color 0.35s ease, border-color 0.35s ease, background-color 0.35s ease;
-  }
-
-  .onward .arrow{
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1), color 0.35s ease;
-    color: var(--ink-dim);
-  }
-
-  .onward a:hover{
-    color: var(--ink);
-    border-color: var(--ink);
-    background-color: rgba(232, 207, 160, 0.05);
-  }
-
-  .onward a:hover .arrow{ transform: translateX(5px); color: var(--ink); }
-
-  .onward a:focus-visible{
-    outline: 1px solid var(--ink-dim);
-    outline-offset: 4px;
-    color: var(--ink);
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    main{ animation: none; }
-    *{ transition-duration: 0.01ms !important; }
-  }
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@300&display=swap">
+<link rel="stylesheet" href="/site.css">
 </head>
 <body>
-
-<canvas class="grain" aria-hidden="true"></canvas>
-
-<main>
-  <h1>Joel Jussila</h1>
-
-  <p class="bio">I'm a curious person, fascinated by understanding the world from first principles. I believe technology is how we can design a world we actually want to live in, and I want to play my own part in that process. I'm a former national-level athlete, engineer by training, and always up for a new sidequest in my free time (preferably one involving an extreme sport). I also love traveling: click below to see where I have been.</p>
-
-  <nav class="onward">
-    <a href="/places/">Places I've explored <span class="arrow" aria-hidden="true">&rarr;</span></a>
-  </nav>
-
-  <ul class="links">
-    <li><a href="https://www.linkedin.com/in/joel-jussila/" rel="me"><span class="n">01</span> LinkedIn</a></li>
-    <li><a href="https://x.com/JoelJussila" rel="me"><span class="n">02</span> X</a></li>
-    <li><a href="https://github.com/joeljussila" rel="me"><span class="n">03</span> GitHub</a></li>
-    <li><a href="https://instagram.com/jussilajoel" rel="me"><span class="n">04</span> Instagram</a></li>
-  </ul>
+<div class="page">
+<img class="ground g-home" src="/ground.webp" alt="" aria-hidden="true">
+<main class="body">
+<h1>Joel Jussila</h1>
+<p class="measure cap">I'm a curious person, fascinated by understanding the world from first principles. I believe technology is how we can design a world we actually want to live in, and I want to play my own part in that process. I'm a former national-level athlete, engineer by training, and always up for a new sidequest in my free time (preferably one involving an extreme sport). I also love traveling: click below to see where I have been.</p>
+<div class="doors mono">
+<a class="door" href="/map.html">Map<span aria-hidden="true">&rarr;</span></a>
+<a class="door" href="/blog.html">Blog<span aria-hidden="true">&rarr;</span></a>
+</div>
+<div class="elsewhere mono">
+<a href="https://www.linkedin.com/in/joel-jussila/" rel="me">LinkedIn</a>
+<a href="https://x.com/JoelJussila" rel="me">X</a>
+<a href="https://github.com/joeljussila" rel="me">GitHub</a>
+<a href="https://instagram.com/jussilajoel" rel="me">Instagram</a>
+</div>
 </main>
-
-<script>
-  (function () {
-    var canvas = document.querySelector(".grain");
-    if (!canvas) return;
-
-    var ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    var size = 160;
-    var buffer = document.createElement("canvas");
-    buffer.width = size;
-    buffer.height = size;
-
-    var bctx = buffer.getContext("2d");
-    if (!bctx) return;
-
-    var image = bctx.createImageData(size, size);
-    var data = image.data;
-
-    for (var i = 0; i < data.length; i += 4) {
-      data[i] = 232;
-      data[i + 1] = 207;
-      data[i + 2] = 160;
-      data[i + 3] = Math.random() * 255 * 0.055;
-    }
-
-    bctx.putImageData(image, 0, 0);
-    var pattern = ctx.createPattern(buffer, "repeat");
-
-    function paint() {
-      var w = window.innerWidth;
-      var h = window.innerHeight;
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.round(w * dpr));
-      canvas.height = Math.max(1, Math.round(h * dpr));
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = pattern;
-      ctx.fillRect(0, 0, w, h);
-    }
-
-    paint();
-
-    var timer;
-    window.addEventListener("resize", function () {
-      clearTimeout(timer);
-      timer = setTimeout(paint, 150);
-    });
-  })();
-</script>
-
+<nav class="folio mono" aria-label="Site">
+<a href="/" aria-current="page">Home</a>
+<a href="/map.html">Map</a>
+<a href="/blog.html">Blog</a>
+</nav>
+</div>
 </body>
 </html>

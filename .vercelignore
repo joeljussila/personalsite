@@ -1,0 +1,8 @@
+# Kept out of the deployment; none of it is part of the site.
+README.md
+convert.js
+import-photos.py
+import-ledger.json
+posts/_template.html
+__pycache__/
+design/

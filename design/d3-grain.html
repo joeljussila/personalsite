@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grain - Joel Jussila</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400&display=swap">
+<style>
+  :root{
+    --paper:     #FAFAF8;
+    --paper-2:   #F0F0EE;
+    --ink:       #0E0F11;
+    --ink-mid:   #3A3C40;
+    --ink-soft:  #6E7176;
+    --ink-faint: #A6A9AD;
+    --rule:      #D8D8D5;
+    --display: Archivo, "Helvetica Neue", Arial, sans-serif;
+    --body: "Inter Tight", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    margin:0; background:var(--paper); color:var(--ink-mid);
+    font-family:var(--body); font-weight:300; font-size:16px; line-height:1.7;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+
+  #blocks{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  #grain{ position:fixed; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; opacity:.55; }
+
+  .veil{
+    position:fixed; inset:0; z-index:2; pointer-events:none;
+    background:linear-gradient(to right, rgba(250,250,248,.97) 0%, rgba(250,250,248,.94) 42%, rgba(250,250,248,.62) 70%, rgba(250,250,248,.42) 100%);
+  }
+  html[data-current-view="places"] .veil,
+  html[data-current-view="blog"] .veil,
+  html[data-current-view="post"] .veil{ background:rgba(250,250,248,.93); }
+
+  /* ---- a hard modular grid ---------------------------------------------- */
+
+  .shell{
+    position:relative; z-index:3; min-height:100%;
+    max-width:78rem; margin:0 auto;
+    padding: clamp(1.25rem,3vw,2rem) clamp(1.25rem,4vw,3rem) 4rem;
+  }
+
+  .masthead{
+    display:grid; grid-template-columns:1fr auto; align-items:center; gap:2rem;
+    padding-bottom:.85rem; border-bottom:2px solid var(--ink);
+  }
+  .sigil{
+    font-family:var(--display); font-weight:600; font-size:.875rem;
+    letter-spacing:-.01em; text-transform:uppercase; color:var(--ink); text-decoration:none;
+  }
+  nav.top{ display:flex; gap:1.25rem; }
+  nav.top a{
+    font-family:var(--mono); font-size:.625rem; font-weight:500; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--ink-soft); text-decoration:none;
+    padding:.2rem .45rem; transition:background-color .25s ease, color .25s ease;
+  }
+  nav.top a:hover{ background:var(--ink); color:var(--paper); }
+  html[data-current-view="places"] nav.top a[data-goto="places"],
+  html[data-current-view="blog"] nav.top a[data-goto="blog"],
+  html[data-current-view="post"] nav.top a[data-goto="blog"]{ background:var(--ink); color:var(--paper); }
+
+  /* ---- home -------------------------------------------------------------- */
+
+  .hero{ padding: clamp(2.5rem,9vh,5rem) 0 0; }
+
+  h1{
+    font-family:var(--display); font-weight:600;
+    font-size:clamp(3.5rem,15vw,10rem);
+    line-height:.84; letter-spacing:-.045em;
+    color:var(--ink); margin:0 0 2rem; text-transform:uppercase;
+  }
+
+  .band{
+    display:grid; grid-template-columns:repeat(12,1fr); gap:1.5rem;
+    border-top:1px solid var(--rule); padding-top:1.25rem; margin-bottom:1.25rem;
+  }
+  .band .label{
+    grid-column:span 2;
+    font-family:var(--mono); font-size:.5625rem; font-weight:500; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-faint);
+  }
+  .band .content{ grid-column:span 7; }
+  .band p{ margin:0 0 1rem; font-size:1rem; line-height:1.75; color:var(--ink-mid); max-width:40ch; }
+  .band p:last-child{ margin-bottom:0; }
+
+  .doors{ display:flex; flex-wrap:wrap; gap:.5rem; margin:2rem 0 0; }
+  .door{
+    font-family:var(--mono); font-size:.6875rem; font-weight:500; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--paper); background:var(--ink);
+    text-decoration:none; padding:.75rem 1.15rem;
+    display:inline-flex; align-items:center; gap:.8rem;
+    transition:background-color .25s ease;
+  }
+  .door:hover{ background:var(--ink-mid); }
+  .door.ghost{ background:none; color:var(--ink); box-shadow:inset 0 0 0 1px var(--ink); }
+  .door.ghost:hover{ background:var(--ink); color:var(--paper); }
+
+  .elsewhere{ list-style:none; margin:3rem 0 0; padding:1rem 0 0; border-top:1px solid var(--rule); display:flex; flex-wrap:wrap; gap:.3rem 1.5rem; }
+  .elsewhere a{ font-family:var(--mono); font-size:.5625rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); text-decoration:none; }
+  .elsewhere a:hover{ color:var(--ink); }
+
+  /* ---- section heads ------------------------------------------------------ */
+
+  .view-head{ padding: clamp(2rem,6vh,3.5rem) 0 clamp(1.25rem,3vh,2rem); }
+  .kicker{ font-family:var(--mono); font-size:.5625rem; font-weight:500; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 .75rem; }
+  h2.section{ font-family:var(--display); font-weight:600; font-size:clamp(2.25rem,7vw,4rem); line-height:.9; letter-spacing:-.035em; text-transform:uppercase; color:var(--ink); margin:0 0 .8rem; }
+  .note{ font-size:.9375rem; color:var(--ink-soft); max-width:44ch; margin:0; }
+
+  /* ---- places -------------------------------------------------------------- */
+
+  .stage{ display:grid; grid-template-columns:minmax(0,1fr) 16rem; gap:clamp(1.5rem,4vw,3rem); align-items:start; border-top:1px solid var(--rule); padding-top:1.5rem; }
+  .globe-holder{ position:relative; display:grid; place-items:center; min-height:min(58vh,32rem); }
+
+  canvas[data-proto="globe"]{
+    display:block; touch-action:none; cursor:grab; max-width:100%;
+    --g-sea: #FFFFFF;
+    --g-land: #E4E4E1;
+    --g-edge: #0E0F11;
+    --g-grat: rgba(14,15,17,.10);
+    --g-rim: #0E0F11;
+    --g-mark: #0E0F11;
+    --g-mark-hi: #0E0F11;
+    --g-label: #0E0F11;
+    --g-glow: 14,15,17;
+    --g-glow-alpha: 0;
+    --g-label-font: 500 10px "IBM Plex Mono", monospace;
+    --g-mark-shape: square;
+  }
+  canvas.dragging{ cursor:grabbing; }
+
+  .index-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:var(--mono); font-size:.5625rem; font-weight:500; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--paper); background:var(--ink);
+    padding:.45rem .6rem; margin:0 0 .35rem;
+  }
+  ul.index{ list-style:none; margin:0; padding:0; max-height:min(28rem,54vh); overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--rule) transparent; }
+  ul.index::-webkit-scrollbar{ width:4px; }
+  ul.index::-webkit-scrollbar-thumb{ background:var(--rule); }
+  ul.index button{
+    width:100%; display:flex; align-items:baseline; gap:.7rem;
+    padding:.3rem .6rem; background:none; border:0; text-align:left;
+    font-family:var(--mono); font-size:.625rem; font-weight:500; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-soft); cursor:pointer;
+    transition:background-color .2s ease, color .2s ease;
+  }
+  ul.index button:hover, ul.index button[aria-current="true"]{ background:var(--ink); color:var(--paper); }
+  ul.index .n{ font-size:.5rem; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+  ul.index button:hover .n, ul.index button[aria-current="true"] .n{ color:var(--ink-faint); }
+
+  /* ---- panel ---------------------------------------------------------------- */
+
+  .panel{
+    position:fixed; top:0; right:0; bottom:0; z-index:30;
+    width:min(25rem,100vw); background:var(--paper);
+    border-left:2px solid var(--ink); padding:clamp(1.25rem,3vw,2rem);
+    overflow-y:auto; transform:translateX(101%); visibility:hidden;
+  }
+  .ready .panel{ transition: transform .45s cubic-bezier(.22,.61,.36,1), visibility 0s linear .45s; }
+  .panel[data-open="true"]{ transform:none; visibility:visible; transition: transform .45s cubic-bezier(.22,.61,.36,1), visibility 0s; }
+
+  .panel-close{
+    background:var(--ink); border:0; color:var(--paper); padding:.45rem .85rem;
+    font-family:var(--mono); font-size:.5625rem; font-weight:500; letter-spacing:.16em;
+    text-transform:uppercase; cursor:pointer;
+  }
+  .panel h3{ font-family:var(--display); font-weight:600; font-size:2rem; line-height:.95; letter-spacing:-.03em; text-transform:uppercase; color:var(--ink); margin:1.5rem 0 .35rem; }
+  .coords{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.12em; color:var(--ink-soft); margin:0 0 1.5rem; }
+
+  .frames{ display:grid; grid-template-columns:1fr 1fr; gap:.4rem; }
+  .frames .frame:first-child:last-child{ grid-column:span 2; }
+  .frame{ position:relative; aspect-ratio:1/1; overflow:hidden; cursor:pointer; background:var(--paper-2); }
+  /* Flat grey, hard contrast: the photographs join the grid of blocks
+     behind them rather than sitting on top of it. */
+  .frame img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:grayscale(1) contrast(1.25) brightness(1.02);
+    transition:transform .6s cubic-bezier(.22,.61,.36,1);
+  }
+  .frame:hover img{ transform:scale(1.04); }
+  .frame.is-empty{ display:grid; place-items:center; cursor:default; font-family:var(--mono); font-size:.5rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); }
+
+  .lightbox{
+    position:fixed; inset:0; z-index:60; background:rgba(250,250,248,.97);
+    display:grid; place-items:center; padding:clamp(1.5rem,6vw,5rem);
+    opacity:0; visibility:hidden; transition:opacity .35s ease, visibility .35s; cursor:zoom-out;
+  }
+  .lightbox[data-open="true"]{ opacity:1; visibility:visible; }
+  .lightbox img{ max-width:100%; max-height:80vh; display:block; }
+  .lightbox figcaption{ font-family:var(--mono); font-size:.5625rem; font-weight:500; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); margin-top:1rem; text-align:center; }
+
+  /* ---- blog ------------------------------------------------------------------ */
+
+  ul.posts{ list-style:none; margin:0; padding:0; max-width:56rem; border-top:2px solid var(--ink); }
+  ul.posts button{
+    width:100%; display:grid; grid-template-columns:3rem 1fr 8rem; gap:1.5rem; align-items:start;
+    padding:1.5rem 0; background:none; border:0; border-bottom:1px solid var(--rule);
+    text-align:left; cursor:pointer; transition:background-color .2s ease;
+  }
+  ul.posts button:hover{ background:var(--paper-2); }
+  .post-n{ font-family:var(--mono); font-size:.5625rem; font-weight:500; color:var(--ink-faint); padding-top:.5rem; }
+  .post-title{ display:block; font-family:var(--display); font-weight:600; font-size:1.5rem; line-height:1.08; letter-spacing:-.025em; color:var(--ink); margin-bottom:.4rem; }
+  .post-stand{ display:block; font-size:.875rem; color:var(--ink-soft); max-width:46ch; }
+  .post-meta{ display:flex; flex-direction:column; gap:.2rem; font-family:var(--mono); font-size:.5rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); padding-top:.5rem; text-align:right; }
+
+  /* ---- one post --------------------------------------------------------------- */
+
+  .article{ max-width:34rem; padding: clamp(2rem,6vh,4rem) 0 4rem; }
+  .article .back{ font-family:var(--mono); font-size:.5625rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); text-decoration:none; display:inline-block; margin-bottom:2.5rem; cursor:pointer; }
+  .article .back:hover{ color:var(--ink); }
+  .article h2{ font-family:var(--display); font-weight:600; font-size:clamp(2rem,5.5vw,3rem); line-height:.95; letter-spacing:-.035em; color:var(--ink); margin:0 0 1rem; }
+  .article .standfirst{ font-size:1.125rem; line-height:1.6; color:var(--ink-soft); margin:0 0 1.25rem; }
+  .article .dateline{ font-family:var(--mono); font-size:.5625rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); padding-bottom:2rem; margin:0 0 2rem; border-bottom:1px solid var(--rule); }
+  .article .body p{ font-size:1.0625rem; line-height:1.85; color:var(--ink-mid); margin:0 0 1.5rem; }
+
+  @media (max-width:900px){
+    .band{ grid-template-columns:1fr; gap:.5rem; }
+    .band .label, .band .content{ grid-column:auto; }
+    .stage{ grid-template-columns:1fr; }
+    ul.index{ max-height:15rem; }
+    .panel{ top:auto; width:100%; max-height:84svh; border-left:0; border-top:2px solid var(--ink); transform:translateY(101%); }
+    ul.posts button{ grid-template-columns:2rem 1fr; }
+    .post-meta{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ transition-duration:.01ms !important; } }
+</style>
+</head>
+<body>
+
+<canvas id="blocks" aria-hidden="true"></canvas>
+<canvas id="grain" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+
+<div class="shell">
+
+  <header class="masthead">
+    <a class="sigil" href="#" data-goto="home">Joel Jussila</a>
+    <nav class="top">
+      <a href="#" data-goto="places">Places</a>
+      <a href="#" data-goto="blog">Blog</a>
+      <a href="https://www.linkedin.com/in/joel-jussila/">LinkedIn</a>
+    </nav>
+  </header>
+
+  <!-- ---- home ---- -->
+  <section data-view="home">
+    <div class="hero">
+      <h1>Joel<br>Jussila</h1>
+
+      <div class="band">
+        <p class="label">Who</p>
+        <div class="content">
+          <p>Curious about the world from first principles. Engineer by training, former national-level athlete, permanently mid-sidequest.</p>
+        </div>
+      </div>
+
+      <div class="band">
+        <p class="label">Why</p>
+        <div class="content">
+          <p>I believe technology is how we design a world we actually want to live in, and I want to play my own part in that. Most of what I do starts with taking something apart to see what it was really for.</p>
+        </div>
+      </div>
+
+      <div class="band">
+        <p class="label">Elsewhere</p>
+        <div class="content">
+          <p>A hundred and twenty-one places so far, eighty-three of them photographed. Standing preference for the ones involving a rope, a board, or a long way down.</p>
+        </div>
+      </div>
+
+      <div class="doors">
+        <a class="door" href="#" data-goto="places">Places I've explored <span>&rarr;</span></a>
+        <a class="door ghost" href="#" data-goto="blog">Writing <span>&rarr;</span></a>
+      </div>
+
+      <ul class="elsewhere">
+        <li><a href="https://www.linkedin.com/in/joel-jussila/" rel="me">LinkedIn</a></li>
+        <li><a href="https://x.com/JoelJussila" rel="me">X</a></li>
+        <li><a href="https://github.com/joeljussila" rel="me">GitHub</a></li>
+        <li><a href="https://instagram.com/jussilajoel" rel="me">Instagram</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ---- places ---- -->
+  <section data-view="places" hidden>
+    <div class="view-head">
+      <p class="kicker">Atlas &mdash; <span data-proto="count-inline"></span> places</p>
+      <h2 class="section">Places I've<br>explored</h2>
+      <p class="note">Drag to turn the globe. Every mark is somewhere I have been; open one to see what it looks like.</p>
+    </div>
+    <div class="stage">
+      <div class="globe-holder">
+        <canvas data-proto="globe" data-globe-style="fill" aria-label="Rotatable globe marking visited places. The list beside it covers the same places."></canvas>
+      </div>
+      <nav>
+        <p class="index-head"><span>Index</span><span data-proto="count"></span></p>
+        <ul class="index" data-proto="index"></ul>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ---- blog ---- -->
+  <section data-view="blog" hidden>
+    <div class="view-head">
+      <p class="kicker">Blog</p>
+      <h2 class="section">Writing</h2>
+      <p class="note">Thinking out loud, mostly unfinished. Placeholder pieces until there is something real to put here.</p>
+    </div>
+    <ul class="posts" data-proto="posts"></ul>
+  </section>
+
+  <!-- ---- one post ---- -->
+  <section data-view="post" hidden>
+    <article class="article">
+      <a class="back" data-goto="blog">&larr; All writing</a>
+      <h2 data-proto="post-title"></h2>
+      <p class="standfirst" data-proto="post-standfirst"></p>
+      <p class="dateline" data-proto="post-date"></p>
+      <div class="body" data-proto="post-body"></div>
+    </article>
+  </section>
+
+</div>
+
+<aside class="panel" data-proto="panel" data-open="false" aria-hidden="true">
+  <button class="panel-close" data-proto="panel-close" type="button">Close</button>
+  <h3 data-proto="panel-title"></h3>
+  <p class="coords" data-proto="panel-coords"></p>
+  <div class="frames" data-proto="panel-frames"></div>
+</aside>
+
+<figure class="lightbox" data-proto="lightbox" data-open="false" aria-hidden="true">
+  <img data-proto="lightbox-img" alt="">
+  <figcaption data-proto="lightbox-caption"></figcaption>
+</figure>
+
+<script src="proto.js"></script>
+<script>
+/* ---- the block field -------------------------------------------------------
+ *
+ * A coarse grid of grey rectangles, each easing toward a new value on its own
+ * schedule. Only a handful are ever in motion, and each move takes the better
+ * part of a minute, so the composition is different every time you look
+ * without ever being seen to change. Forty rectangles is nothing to draw, so
+ * this can afford to repaint on a plain interval.
+ */
+(function(){
+  var canvas = document.getElementById("blocks");
+  var ctx = canvas.getContext("2d");
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var COLS = 7, ROWS = 5;
+  var cells = [], W = 0, H = 0;
+
+  function tone(){
+    // Weighted toward the pale end so the field stays background.
+    var r = Math.random();
+    if (r < 0.34) return 0.02 + Math.random() * 0.06;
+    if (r < 0.72) return 0.10 + Math.random() * 0.10;
+    return 0.22 + Math.random() * 0.16;
+  }
+
+  function build(){
+    cells = [];
+    for (var r = 0; r < ROWS; r++){
+      for (var c = 0; c < COLS; c++){
+        var v = tone();
+        cells.push({
+          c: c, r: r,
+          // Cells straddle their neighbours a little, which is what gives the
+          // field its overlapping-plates look instead of a chequerboard.
+          spanC: Math.random() < 0.26 ? 2 : 1,
+          spanR: Math.random() < 0.20 ? 2 : 1,
+          v: v, from: v, to: v,
+          t: 1, dur: 1, wait: 2 + Math.random() * 26
+        });
+      }
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var cw = W / COLS, ch = H / ROWS;
+    for (var i = 0; i < cells.length; i++){
+      var cell = cells[i];
+      if (cell.v <= 0.005) continue;
+      ctx.fillStyle = "rgba(14,15,17," + cell.v.toFixed(3) + ")";
+      ctx.fillRect(
+        Math.round(cell.c * cw), Math.round(cell.r * ch),
+        Math.ceil(cw * cell.spanC), Math.ceil(ch * cell.spanR)
+      );
+    }
+  }
+
+  function step(dt){
+    for (var i = 0; i < cells.length; i++){
+      var cell = cells[i];
+      if (cell.t >= 1){
+        cell.wait -= dt;
+        if (cell.wait > 0) continue;
+        cell.from = cell.v;
+        cell.to = tone();
+        cell.t = 0;
+        cell.dur = 18 + Math.random() * 34;   // the better part of a minute
+        cell.wait = 6 + Math.random() * 40;
+        continue;
+      }
+      cell.t = Math.min(1, cell.t + dt / cell.dur);
+      var e = cell.t < 0.5 ? 2*cell.t*cell.t : 1 - Math.pow(-2*cell.t + 2, 2) / 2;
+      cell.v = cell.from + (cell.to - cell.from) * e;
+    }
+  }
+
+  function resize(){
+    W = Math.max(1, innerWidth); H = Math.max(1, innerHeight);
+    var dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    draw();
+  }
+
+  build();
+  var timer;
+  addEventListener("resize", function(){ clearTimeout(timer); timer = setTimeout(resize, 150); });
+  resize();
+
+  if (!reduced){
+    var last = performance.now();
+    setInterval(function(){
+      var now = performance.now();
+      var dt = Math.min((now - last) / 1000, 1);
+      last = now;
+      step(dt);
+      draw();
+    }, 100);
+  }
+})();
+
+/* ---- grain ----------------------------------------------------------------
+ * Painted once into a small tile and repeated. This is the thing that stops
+ * the flat rectangles above from looking like a CSS gradient and makes them
+ * look like film.
+ */
+(function(){
+  var canvas = document.getElementById("grain");
+  var ctx = canvas.getContext("2d");
+  var size = 180;
+  var tile = document.createElement("canvas");
+  tile.width = tile.height = size;
+  var t = tile.getContext("2d");
+  var image = t.createImageData(size, size);
+  var data = image.data;
+  for (var i = 0; i < data.length; i += 4){
+    var v = Math.random() * 255;
+    data[i] = data[i+1] = data[i+2] = v;
+    data[i+3] = Math.random() * 255 * 0.10;
+  }
+  t.putImageData(image, 0, 0);
+  var pattern = ctx.createPattern(tile, "repeat");
+
+  function paint(){
+    var W = innerWidth, H = innerHeight;
+    var dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0,0,W,H);
+  }
+  var timer;
+  addEventListener("resize", function(){ clearTimeout(timer); timer = setTimeout(paint, 150); });
+  paint();
+})();
+
+Proto.start();
+</script>
+</body>
+</html>

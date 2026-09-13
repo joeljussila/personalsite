@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartograph - Joel Jussila</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Spectral:ital,wght@0,200;0,300;0,400;1,300&display=swap">
+<style>
+  :root{
+    --paper:      #EFE9DA;
+    --paper-warm: #E7E0CD;
+    --ink:        #1C3468;
+    --ink-mid:    #2B4A8C;
+    --ink-soft:   #5B75AE;
+    --ink-faint:  #9AAAC8;
+    --rule:       #B9AF98;
+    --rule-fine:  #CFC6B1;
+    --display: Spectral, Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink-mid);
+    font-family:var(--display);
+    font-weight:300;
+    font-size:16px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  #contours{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+
+  .veil{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(88% 72% at 50% 44%, rgba(239,233,218,.90) 0%, rgba(239,233,218,.72) 48%, rgba(239,233,218,.30) 100%);
+  }
+  html[data-current-view="places"] .veil,
+  html[data-current-view="blog"] .veil,
+  html[data-current-view="post"] .veil{
+    background: rgba(239,233,218,.90);
+  }
+
+  /* ---- the drawing sheet -----------------------------------------------
+     The whole page is presented as a survey sheet: a ruled border, corner
+     registration marks, and a title block that carries the metadata a
+     drawing would carry. */
+
+  .sheet{
+    position:relative;
+    z-index:2;
+    min-height:100%;
+    margin: clamp(.75rem,2vw,1.5rem);
+    border:1px solid var(--rule);
+    padding: clamp(1.5rem,3.5vw,2.75rem) clamp(1.5rem,4vw,3.25rem) 0;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* Registration marks, one per corner. */
+  .sheet::before, .sheet::after,
+  .reg-b::before, .reg-b::after{
+    content:"";
+    position:absolute;
+    width:14px; height:14px;
+    border:0 solid var(--ink-soft);
+    pointer-events:none;
+  }
+  .sheet::before{ top:-1px; left:-1px; border-top-width:1px; border-left-width:1px; }
+  .sheet::after{ top:-1px; right:-1px; border-top-width:1px; border-right-width:1px; }
+  .reg-b::before{ bottom:-1px; left:-1px; border-bottom-width:1px; border-left-width:1px; }
+  .reg-b::after{ bottom:-1px; right:-1px; border-bottom-width:1px; border-right-width:1px; }
+  .reg-b{ position:absolute; inset:0; pointer-events:none; }
+
+  .sheet-head{
+    display:flex; justify-content:space-between; align-items:baseline; gap:2rem;
+    font-family:var(--mono); font-size:.625rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-soft);
+    padding-bottom:.85rem; border-bottom:1px solid var(--rule-fine);
+  }
+  .sheet-head a{ color:var(--ink-soft); text-decoration:none; transition:color .3s ease; }
+  .sheet-head a:hover{ color:var(--ink); }
+  nav.top{ display:flex; gap:1.5rem; }
+  html[data-current-view="places"] nav.top a[data-goto="places"],
+  html[data-current-view="blog"] nav.top a[data-goto="blog"],
+  html[data-current-view="post"] nav.top a[data-goto="blog"]{ color:var(--ink); }
+
+  .sheet-body{ flex:1; }
+
+  /* ---- title block ------------------------------------------------------ */
+
+  .title-block{
+    margin-top:auto;
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    border-top:1px solid var(--rule);
+    font-family:var(--mono);
+    font-size:.5625rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+  }
+  .title-block div{ padding:.85rem 1rem .9rem 0; border-right:1px solid var(--rule-fine); }
+  .title-block div:last-child{ border-right:0; }
+  .title-block dt{ color:var(--ink-faint); margin:0 0 .35rem; }
+  .title-block dd{ color:var(--ink); margin:0; letter-spacing:.1em; }
+
+  /* ---- home ------------------------------------------------------------- */
+
+  .plate{
+    display:grid;
+    grid-template-columns: minmax(0,1.25fr) minmax(0,1fr);
+    gap: clamp(2rem,6vw,5rem);
+    align-items:end;
+    padding: clamp(3rem,11vh,7rem) 0 clamp(2.5rem,7vh,4.5rem);
+  }
+
+  h1{
+    font-family:var(--display);
+    font-weight:200;
+    font-size:clamp(2.75rem,7.5vw,4.75rem);
+    line-height:1.02;
+    letter-spacing:-.01em;
+    color:var(--ink);
+    margin:0;
+  }
+  h1 small{
+    display:block;
+    font-family:var(--mono);
+    font-weight:400;
+    font-size:.6875rem;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:1.5rem;
+  }
+
+  .spec{
+    border-top:1px solid var(--rule-fine);
+    padding-top:1.25rem;
+  }
+  .spec p{ font-size:1rem; line-height:1.85; color:var(--ink-mid); margin:0 0 1.25rem; }
+  .spec p:last-of-type{ margin-bottom:2rem; }
+
+  .doors{ display:flex; flex-direction:column; gap:.15rem; margin:0 0 2rem; }
+  .door{
+    display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+    padding:.7rem 0; border-bottom:1px solid var(--rule-fine);
+    font-family:var(--mono); font-size:.6875rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink); text-decoration:none;
+    transition:padding-left .35s cubic-bezier(.22,.61,.36,1), color .3s ease;
+  }
+  .door:hover{ padding-left:.6rem; color:var(--ink-mid); }
+  .door .arrow{ color:var(--ink-faint); }
+
+  .elsewhere{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:.3rem 1.5rem; }
+  .elsewhere a{
+    font-family:var(--mono); font-size:.5625rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-soft); text-decoration:none;
+  }
+  .elsewhere a:hover{ color:var(--ink); }
+
+  /* ---- section heads ---------------------------------------------------- */
+
+  .view-head{ padding: clamp(2rem,6vh,3.5rem) 0 clamp(1.25rem,3vh,2rem); }
+  .kicker{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.28em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 .9rem; }
+  h2.section{ font-family:var(--display); font-weight:200; font-size:clamp(2rem,5vw,3rem); line-height:1.06; color:var(--ink); margin:0 0 .7rem; }
+  .note{ font-size:.9375rem; color:var(--ink-soft); max-width:46ch; margin:0; }
+
+  /* ---- places ----------------------------------------------------------- */
+
+  .stage{ display:grid; grid-template-columns:minmax(0,1fr) 15rem; gap:clamp(2rem,5vw,3.5rem); align-items:start; }
+  .globe-holder{ position:relative; display:grid; place-items:center; min-height:min(58vh,32rem); }
+
+  canvas[data-proto="globe"]{
+    display:block; touch-action:none; cursor:grab; max-width:100%;
+    --g-sea: rgba(239,233,218,.55);
+    --g-land: transparent;
+    --g-edge: #1C3468;
+    --g-grat: rgba(28,52,104,.22);
+    --g-rim: rgba(28,52,104,.55);
+    --g-mark: #1C3468;
+    --g-mark-hi: #1C3468;
+    --g-label: #1C3468;
+    --g-glow: 28,52,104;
+    --g-glow-alpha: 0;
+    --g-label-font: 500 10px "IBM Plex Mono", monospace;
+    --g-mark-shape: cross;
+  }
+  canvas.dragging{ cursor:grabbing; }
+
+  .index-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:var(--mono); font-size:.5625rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-faint);
+    padding-bottom:.6rem; margin:0 0 .4rem; border-bottom:1px solid var(--rule);
+  }
+  ul.index{
+    list-style:none; margin:0; padding:0 .5rem 0 0;
+    max-height:min(28rem,54vh); overflow-y:auto;
+    scrollbar-width:thin; scrollbar-color:var(--rule-fine) transparent;
+  }
+  ul.index::-webkit-scrollbar{ width:4px; }
+  ul.index::-webkit-scrollbar-thumb{ background:var(--rule-fine); }
+  ul.index button{
+    width:100%; display:flex; align-items:baseline; gap:.8rem;
+    padding:.3rem 0; background:none; border:0; text-align:left;
+    font-family:var(--mono); font-size:.6875rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-soft); cursor:pointer;
+    transition:color .25s ease;
+  }
+  ul.index button:hover, ul.index button[aria-current="true"]{ color:var(--ink); }
+  ul.index .n{ font-size:.5rem; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+
+  /* ---- panel ------------------------------------------------------------ */
+
+  .panel{
+    position:fixed; top:0; right:0; bottom:0; z-index:30;
+    width:min(24rem,100vw);
+    background:var(--paper);
+    border-left:1px solid var(--rule);
+    padding:clamp(1.5rem,3.5vw,2.25rem);
+    overflow-y:auto;
+    transform:translateX(101%);
+    visibility:hidden;
+    box-shadow:-30px 0 60px -45px rgba(28,52,104,.45);
+  }
+  .ready .panel{ transition: transform .5s cubic-bezier(.22,.61,.36,1), visibility 0s linear .5s; }
+  .panel[data-open="true"]{ transform:none; visibility:visible; transition: transform .5s cubic-bezier(.22,.61,.36,1), visibility 0s; }
+
+  .panel-close{
+    background:none; border:1px solid var(--rule-fine); padding:.4rem .8rem;
+    font-family:var(--mono); font-size:.5625rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-soft); cursor:pointer;
+    transition:color .3s ease, border-color .3s ease;
+  }
+  .panel-close:hover{ color:var(--ink); border-color:var(--ink-soft); }
+  .panel h3{ font-family:var(--display); font-weight:200; font-size:2rem; line-height:1.1; color:var(--ink); margin:1.5rem 0 .3rem; }
+  .coords{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.14em; color:var(--ink-faint); margin:0 0 1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--rule-fine); }
+
+  .frames{ display:grid; gap:.5rem; }
+  .frame{
+    position:relative; aspect-ratio:3/2; overflow:hidden; cursor:pointer;
+    background:var(--paper-warm); border:1px solid var(--rule-fine);
+  }
+  .frame img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:grayscale(1) contrast(1.15) brightness(1.02);
+    mix-blend-mode:multiply;
+    transition:transform .8s cubic-bezier(.22,.61,.36,1);
+  }
+  .frame::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:#1C3468; mix-blend-mode:screen; opacity:.58;
+  }
+  .frame:hover img{ transform:scale(1.03); }
+  .frame.is-empty{ display:grid; place-items:center; cursor:default; font-family:var(--mono); font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); }
+  .frame.is-empty::after{ display:none; }
+
+  .lightbox{
+    position:fixed; inset:0; z-index:60; background:rgba(239,233,218,.95);
+    display:grid; place-items:center; padding:clamp(1.5rem,6vw,5rem);
+    opacity:0; visibility:hidden; transition:opacity .4s ease, visibility .4s; cursor:zoom-out;
+  }
+  .lightbox[data-open="true"]{ opacity:1; visibility:visible; }
+  .lightbox img{ max-width:100%; max-height:80vh; display:block; border:1px solid var(--rule); }
+  .lightbox figcaption{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-soft); margin-top:1.1rem; text-align:center; }
+
+  /* ---- blog -------------------------------------------------------------- */
+
+  ul.posts{ list-style:none; margin:0; padding:0; max-width:52rem; border-top:1px solid var(--rule); }
+  ul.posts button{
+    width:100%; display:grid; grid-template-columns:3rem 1fr 7rem; gap:1.5rem; align-items:start;
+    padding:1.5rem 0; background:none; border:0; border-bottom:1px solid var(--rule-fine);
+    text-align:left; cursor:pointer; transition:background-color .3s ease;
+  }
+  ul.posts button:hover{ background:rgba(28,52,104,.035); }
+  .post-n{ font-family:var(--mono); font-size:.5625rem; color:var(--ink-faint); padding-top:.4rem; }
+  .post-title{ display:block; font-family:var(--display); font-weight:300; font-size:1.5rem; line-height:1.22; color:var(--ink); margin-bottom:.25rem; }
+  .post-stand{ display:block; font-size:.875rem; color:var(--ink-soft); max-width:44ch; }
+  .post-meta{ display:flex; flex-direction:column; gap:.25rem; font-family:var(--mono); font-size:.5rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); padding-top:.45rem; text-align:right; }
+
+  /* ---- one post ---------------------------------------------------------- */
+
+  .article{ max-width:33rem; padding: clamp(2rem,6vh,4rem) 0 4rem; }
+  .article .back{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); text-decoration:none; display:inline-block; margin-bottom:2.5rem; cursor:pointer; }
+  .article .back:hover{ color:var(--ink); }
+  .article h2{ font-family:var(--display); font-weight:200; font-size:clamp(2rem,5vw,2.875rem); line-height:1.1; color:var(--ink); margin:0 0 .9rem; }
+  .article .standfirst{ font-style:italic; font-size:1.125rem; line-height:1.65; color:var(--ink-soft); margin:0 0 1.25rem; }
+  .article .dateline{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); padding-bottom:2rem; margin:0 0 2rem; border-bottom:1px solid var(--rule-fine); }
+  .article .body p{ font-size:1.0625rem; line-height:1.9; color:var(--ink-mid); margin:0 0 1.5rem; }
+
+  @media (max-width:900px){
+    .plate{ grid-template-columns:1fr; align-items:start; gap:2.5rem; }
+    .stage{ grid-template-columns:1fr; }
+    ul.index{ max-height:15rem; }
+    .title-block{ grid-template-columns:repeat(2,1fr); }
+    .title-block div:nth-child(2){ border-right:0; }
+    .panel{ top:auto; width:100%; max-height:84svh; border-left:0; border-top:1px solid var(--rule); transform:translateY(101%); }
+    ul.posts button{ grid-template-columns:2rem 1fr; }
+    .post-meta{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ transition-duration:.01ms !important; } }
+</style>
+</head>
+<body>
+
+<canvas id="contours" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+
+<div class="sheet">
+  <span class="reg-b" aria-hidden="true"></span>
+
+  <div class="sheet-head">
+    <a href="#" data-goto="home">Joel Jussila</a>
+    <nav class="top">
+      <a href="#" data-goto="places">Sheet 02 / Places</a>
+      <a href="#" data-goto="blog">Sheet 03 / Blog</a>
+    </nav>
+  </div>
+
+  <div class="sheet-body">
+
+    <!-- ---- home ---- -->
+    <section data-view="home">
+      <div class="plate">
+        <h1><small>Sheet 01 &mdash; General arrangement</small>Joel<br>Jussila</h1>
+        <div class="spec">
+          <p>Curious about the world from first principles. Engineer by training, former national-level athlete, permanently mid-sidequest.</p>
+          <p>I believe technology is how we design a world we actually want to live in. Most of what I do starts with taking something apart to see what it was really for.</p>
+          <div class="doors">
+            <a class="door" href="#" data-goto="places">Places I've explored <span class="arrow">&rarr;</span></a>
+            <a class="door" href="#" data-goto="blog">Writing <span class="arrow">&rarr;</span></a>
+          </div>
+          <ul class="elsewhere">
+            <li><a href="https://www.linkedin.com/in/joel-jussila/" rel="me">LinkedIn</a></li>
+            <li><a href="https://x.com/JoelJussila" rel="me">X</a></li>
+            <li><a href="https://github.com/joeljussila" rel="me">GitHub</a></li>
+            <li><a href="https://instagram.com/jussilajoel" rel="me">Instagram</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- places ---- -->
+    <section data-view="places" hidden>
+      <div class="view-head">
+        <p class="kicker">Sheet 02 &mdash; Survey</p>
+        <h2 class="section">Places I've explored</h2>
+        <p class="note">Drag to turn the globe. Every cross is somewhere I have been; open one to see what it looks like.</p>
+      </div>
+      <div class="stage">
+        <div class="globe-holder">
+          <canvas data-proto="globe" data-globe-style="wire" aria-label="Rotatable globe marking visited places. The list beside it covers the same places."></canvas>
+        </div>
+        <nav>
+          <p class="index-head"><span>Index</span><span data-proto="count"></span></p>
+          <ul class="index" data-proto="index"></ul>
+        </nav>
+      </div>
+    </section>
+
+    <!-- ---- blog ---- -->
+    <section data-view="blog" hidden>
+      <div class="view-head">
+        <p class="kicker">Sheet 03 &mdash; Notes</p>
+        <h2 class="section">Writing</h2>
+        <p class="note">Thinking out loud, mostly unfinished. Placeholder pieces until there is something real to put here.</p>
+      </div>
+      <ul class="posts" data-proto="posts"></ul>
+    </section>
+
+    <!-- ---- one post ---- -->
+    <section data-view="post" hidden>
+      <article class="article">
+        <a class="back" data-goto="blog">&larr; All writing</a>
+        <h2 data-proto="post-title"></h2>
+        <p class="standfirst" data-proto="post-standfirst"></p>
+        <p class="dateline" data-proto="post-date"></p>
+        <div class="body" data-proto="post-body"></div>
+      </article>
+    </section>
+
+  </div>
+
+  <dl class="title-block">
+    <div><dt>Drawn by</dt><dd>J. Jussila</dd></div>
+    <div><dt>Places surveyed</dt><dd><span data-proto="count-inline"></span></dd></div>
+    <div><dt>Projection</dt><dd>Orthographic</dd></div>
+    <div><dt>Revision</dt><dd>2026 / A</dd></div>
+  </dl>
+</div>
+
+<aside class="panel" data-proto="panel" data-open="false" aria-hidden="true">
+  <button class="panel-close" data-proto="panel-close" type="button">Close</button>
+  <h3 data-proto="panel-title"></h3>
+  <p class="coords" data-proto="panel-coords"></p>
+  <div class="frames" data-proto="panel-frames"></div>
+</aside>
+
+<figure class="lightbox" data-proto="lightbox" data-open="false" aria-hidden="true">
+  <img data-proto="lightbox-img" alt="">
+  <figcaption data-proto="lightbox-caption"></figcaption>
+</figure>
+
+<script src="proto.js"></script>
+<script>
+/* ---- the contour field ----------------------------------------------------
+ *
+ * A handful of invisible peaks, each drawn as a stack of closed iso-lines
+ * whose radius is perturbed by a sum of sines. The perturbation carries a
+ * phase that advances about a fiftieth of a radian a second, so the terrain
+ * is always being redrawn slightly differently: nothing you can catch in the
+ * act, but the sheet is never quite the same shape twice.
+ *
+ * Redrawn on a timer rather than every frame. At this speed twelve frames a
+ * second is indistinguishable from sixty and costs a fifth as much.
+ */
+(function(){
+  var canvas = document.getElementById("contours");
+  var ctx = canvas.getContext("2d");
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var W = 0, H = 0, peaks = [], phase = 0;
+
+  function build(){
+    var scale = Math.min(W, H);
+    peaks = [
+      { x: 0.20, y: 0.30, rings: 20, step: scale * 0.030, wob: 0.30, k1: 3, k2: 7, seed: 0.0 },
+      { x: 0.62, y: 0.22, rings: 15, step: scale * 0.026, wob: 0.24, k1: 4, k2: 9, seed: 1.9 },
+      { x: 0.84, y: 0.58, rings: 22, step: scale * 0.034, wob: 0.34, k1: 3, k2: 5, seed: 3.4 },
+      { x: 0.38, y: 0.76, rings: 18, step: scale * 0.030, wob: 0.28, k1: 5, k2: 8, seed: 5.1 },
+      { x: 0.06, y: 0.86, rings: 13, step: scale * 0.028, wob: 0.22, k1: 4, k2: 6, seed: 2.6 }
+    ];
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.lineWidth = 0.7;
+
+    for (var p = 0; p < peaks.length; p++){
+      var peak = peaks[p];
+      var px = peak.x * W, py = peak.y * H;
+
+      for (var r = 1; r <= peak.rings; r++){
+        var base = r * peak.step;
+        // Inner rings are tight and calm; the wobble grows as the contour
+        // widens, the way real ground does.
+        var wob = peak.wob * (r / peak.rings);
+        var alpha = 0.34 * (1 - Math.pow(r / peak.rings, 1.7)) + 0.05;
+
+        ctx.strokeStyle = "rgba(28,52,104," + alpha.toFixed(3) + ")";
+        ctx.beginPath();
+
+        for (var a = 0; a <= 72; a++){
+          var t = a / 72 * Math.PI * 2;
+          var rad = base * (1
+            + Math.sin(t * peak.k1 + phase + peak.seed) * wob
+            + Math.sin(t * peak.k2 - phase * 0.7 + peak.seed * 1.6) * wob * 0.45);
+          var x = px + Math.cos(t) * rad;
+          var y = py + Math.sin(t) * rad * 0.78; // flattened, as a map is
+          if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+  }
+
+  function resize(){
+    W = Math.max(1, innerWidth); H = Math.max(1, innerHeight);
+    var dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    build();
+    draw();
+  }
+
+  var timer;
+  addEventListener("resize", function(){ clearTimeout(timer); timer = setTimeout(resize, 150); });
+  resize();
+
+  if (!reduced) setInterval(function(){ phase += 0.0016; draw(); }, 80);
+})();
+
+Proto.start();
+</script>
+</body>
+</html>

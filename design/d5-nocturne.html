@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nocturne - Joel Jussila</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400&family=Inter+Tight:wght@300;400&family=Newsreader:opsz,wght@6..72,200;6..72,300&display=swap">
+<style>
+  :root{
+    --ground:    #0B0C0E;
+    --ground-2:  #121419;
+    --ink:       #EDEAE2;
+    --ink-body:  #C3C4C6;
+    --ink-soft:  #8A8D93;
+    --ink-faint: #565A62;
+    --rule:      #22252B;
+    --blue:      #2A48B8;
+    --blue-soft: #7C90D8;
+    --display: Newsreader, Georgia, serif;
+    --body: "Inter Tight", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    margin:0; background:var(--ground); color:var(--ink-body);
+    font-family:var(--body); font-weight:300; font-size:16px; line-height:1.75;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+
+  #bloom{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  #grain{ position:fixed; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; opacity:.4; }
+
+  .veil{
+    position:fixed; inset:0; z-index:2; pointer-events:none;
+    background:
+      repeating-linear-gradient(to right, rgba(11,12,14,.22) 0 1px, rgba(11,12,14,0) 1px 7px),
+      linear-gradient(to bottom, rgba(11,12,14,.48) 0%, rgba(11,12,14,.16) 45%, rgba(11,12,14,.55) 100%);
+  }
+  html[data-current-view="places"] .veil,
+  html[data-current-view="blog"] .veil,
+  html[data-current-view="post"] .veil{ background:rgba(11,12,14,.80); }
+
+  .shell{
+    position:relative; z-index:3; min-height:100%;
+    max-width:64rem; margin:0 auto;
+    padding: clamp(1.75rem,4vw,3rem) clamp(1.5rem,5vw,4rem) 5rem;
+  }
+
+  /* ---- chrome ------------------------------------------------------------ */
+
+  .masthead{
+    display:flex; justify-content:space-between; align-items:baseline; gap:2rem;
+    padding-bottom:1rem; border-bottom:1px solid var(--rule);
+  }
+  .sigil{
+    font-family:var(--display); font-weight:300; font-size:1rem;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--ink); text-decoration:none;
+  }
+  nav.top{ display:flex; gap:1.75rem; }
+  nav.top a{
+    font-family:var(--mono); font-size:.6875rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-faint); text-decoration:none;
+    padding-bottom:.2rem; border-bottom:1px solid transparent;
+    transition:color .35s ease, border-color .35s ease;
+  }
+  nav.top a:hover{ color:var(--ink); border-bottom-color:var(--blue-soft); }
+  html[data-current-view="places"] nav.top a[data-goto="places"],
+  html[data-current-view="blog"] nav.top a[data-goto="blog"],
+  html[data-current-view="post"] nav.top a[data-goto="blog"]{ color:var(--ink); border-bottom-color:var(--blue-soft); }
+
+  /* ---- home --------------------------------------------------------------- */
+
+  .hero{ padding: clamp(5rem,18vh,11rem) 0 0; max-width:36rem; }
+
+  h1{
+    font-family:var(--display); font-weight:200;
+    font-size:clamp(2.75rem,8vw,4.5rem); line-height:1.02;
+    letter-spacing:-.005em; color:var(--ink); margin:0 0 2rem;
+  }
+
+  .lede{ font-size:1.0625rem; line-height:1.9; color:var(--ink-body); margin:0 0 1.6rem; max-width:33rem; }
+  .lede.dim{ color:var(--ink-soft); }
+
+  .doors{ display:flex; flex-wrap:wrap; gap:.75rem 2.25rem; align-items:baseline; margin:2.5rem 0 4rem; }
+  .door{
+    font-family:var(--display); font-weight:300; font-size:1.3125rem;
+    color:var(--ink); text-decoration:none;
+    display:inline-flex; align-items:baseline; gap:.7rem;
+    padding-bottom:.25rem; border-bottom:1px solid var(--ink-faint);
+    transition:border-color .35s ease, gap .35s ease;
+  }
+  .door .arrow{ font-family:var(--mono); font-size:.75rem; color:var(--blue-soft); }
+  .door:hover{ border-bottom-color:var(--blue-soft); gap:1.1rem; }
+
+  .elsewhere{ list-style:none; margin:0; padding:1.25rem 0 0; border-top:1px solid var(--rule); display:flex; flex-wrap:wrap; gap:.4rem 2.25rem; }
+  .elsewhere a{ font-family:var(--mono); font-size:.6875rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-soft); text-decoration:none; transition:color .3s ease; }
+  .elsewhere a:hover{ color:var(--ink); }
+
+  /* ---- section heads --------------------------------------------------------- */
+
+  .view-head{ padding: clamp(2.5rem,7vh,4.5rem) 0 clamp(1.5rem,4vh,2.5rem); }
+  .kicker{ font-family:var(--mono); font-size:.625rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 1rem; }
+  h2.section{ font-family:var(--display); font-weight:200; font-size:clamp(2.25rem,6vw,3.5rem); line-height:1.05; color:var(--ink); margin:0 0 .85rem; }
+  .note{ font-size:.9375rem; color:var(--ink-soft); max-width:46ch; margin:0; }
+
+  /* ---- places ------------------------------------------------------------------ */
+
+  .stage{ display:grid; grid-template-columns:minmax(0,1fr) 14rem; gap:clamp(2rem,5vw,3.5rem); align-items:start; }
+  .globe-holder{ position:relative; display:grid; place-items:center; min-height:min(60vh,33rem); }
+
+  canvas[data-proto="globe"]{
+    display:block; touch-action:none; cursor:grab; max-width:100%;
+    --g-sea: #070809;
+    --g-land: #171B24;
+    --g-edge: #2C3346;
+    --g-grat: rgba(124,144,216,.09);
+    --g-rim: rgba(124,144,216,.28);
+    --g-mark: #7C90D8;
+    --g-mark-hi: #DCE4FF;
+    --g-label: #DCE4FF;
+    --g-glow: 90,120,230;
+    --g-glow-alpha: 0.22;
+    --g-label-font: 400 11px "IBM Plex Mono", monospace;
+    --g-mark-shape: dot;
+  }
+  canvas.dragging{ cursor:grabbing; }
+
+  .index-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:var(--mono); font-size:.625rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-faint);
+    padding-bottom:.75rem; margin:0 0 .5rem; border-bottom:1px solid var(--rule);
+  }
+  ul.index{ list-style:none; margin:0; padding:0 .5rem 0 0; max-height:min(29rem,56vh); overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--rule) transparent; }
+  ul.index::-webkit-scrollbar{ width:4px; }
+  ul.index::-webkit-scrollbar-thumb{ background:var(--rule); }
+  ul.index button{
+    width:100%; display:flex; align-items:baseline; gap:.85rem;
+    padding:.35rem 0; background:none; border:0; text-align:left;
+    font-family:var(--body); font-weight:300; font-size:.8125rem;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft);
+    cursor:pointer; transition:color .3s ease;
+  }
+  ul.index button:hover, ul.index button[aria-current="true"]{ color:var(--ink); }
+  ul.index .n{ font-family:var(--mono); font-size:.5625rem; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+
+  /* ---- panel ---------------------------------------------------------------------- */
+
+  .panel{
+    position:fixed; top:0; right:0; bottom:0; z-index:30;
+    width:min(25rem,100vw); background:var(--ground);
+    border-left:1px solid var(--rule); padding:clamp(1.5rem,4vw,2.25rem);
+    overflow-y:auto; transform:translateX(101%); visibility:hidden;
+  }
+  .ready .panel{ transition: transform .5s cubic-bezier(.22,.61,.36,1), visibility 0s linear .5s; }
+  .panel[data-open="true"]{ transform:none; visibility:visible; transition: transform .5s cubic-bezier(.22,.61,.36,1), visibility 0s; }
+
+  .panel-close{ background:none; border:1px solid var(--rule); padding:.5rem .85rem; font-family:var(--mono); font-size:.625rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); cursor:pointer; transition:color .3s ease, border-color .3s ease; }
+  .panel-close:hover{ color:var(--ink); border-color:var(--ink-faint); }
+  .panel h3{ font-family:var(--display); font-weight:200; font-size:2rem; line-height:1.1; color:var(--ink); margin:1.5rem 0 .35rem; }
+  .coords{ font-family:var(--mono); font-size:.625rem; letter-spacing:.1em; color:var(--ink-faint); margin:0 0 1.75rem; }
+
+  .frames{ display:grid; gap:.6rem; }
+  /* Duotone into the night: shadows go to the page's own black, highlights
+     to a cold blue, so a photograph reads as part of the same field of
+     light as the globe. */
+  .frame{ position:relative; aspect-ratio:1/1; overflow:hidden; cursor:pointer; background:var(--ground-2); border:1px solid var(--rule); }
+  .frame img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:grayscale(1) contrast(1.15) brightness(.82);
+    transition:transform .8s cubic-bezier(.22,.61,.36,1);
+  }
+  .frame::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(160deg, rgba(60,90,210,.42), rgba(11,12,14,.55));
+    mix-blend-mode:overlay;
+  }
+  .frame:hover img{ transform:scale(1.03); }
+  .frame.is-empty{ display:grid; place-items:center; cursor:default; font-family:var(--mono); font-size:.5625rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); }
+  .frame.is-empty::after{ display:none; }
+
+  .lightbox{
+    position:fixed; inset:0; z-index:60; background:rgba(7,8,9,.94);
+    display:grid; place-items:center; padding:clamp(1.5rem,6vw,5rem);
+    opacity:0; visibility:hidden; transition:opacity .4s ease, visibility .4s; cursor:zoom-out;
+  }
+  .lightbox[data-open="true"]{ opacity:1; visibility:visible; }
+  .lightbox img{ max-width:100%; max-height:82vh; display:block; }
+  .lightbox figcaption{ font-family:var(--mono); font-size:.625rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-soft); margin-top:1.25rem; text-align:center; }
+
+  /* ---- blog ------------------------------------------------------------------------ */
+
+  ul.posts{ list-style:none; margin:0; padding:0; max-width:50rem; border-top:1px solid var(--rule); }
+  ul.posts button{
+    width:100%; display:grid; grid-template-columns:2.5rem 1fr auto; gap:1.5rem; align-items:baseline;
+    padding:1.75rem 0; background:none; border:0; border-bottom:1px solid var(--rule);
+    text-align:left; cursor:pointer; transition:padding-left .4s cubic-bezier(.22,.61,.36,1);
+  }
+  ul.posts button:hover{ padding-left:.75rem; }
+  .post-n{ font-family:var(--mono); font-size:.625rem; color:var(--ink-faint); }
+  .post-title{ display:block; font-family:var(--display); font-weight:300; font-size:1.5rem; line-height:1.22; color:var(--ink); margin-bottom:.3rem; }
+  .post-stand{ display:block; font-size:.875rem; color:var(--ink-soft); max-width:44ch; }
+  .post-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:.2rem; font-family:var(--mono); font-size:.5625rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); }
+
+  /* ---- one post --------------------------------------------------------------------- */
+
+  .article{ max-width:33rem; padding: clamp(2.5rem,7vh,4.5rem) 0 5rem; }
+  .article .back{ font-family:var(--mono); font-size:.625rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); text-decoration:none; display:inline-block; margin-bottom:3rem; cursor:pointer; }
+  .article .back:hover{ color:var(--ink); }
+  .article h2{ font-family:var(--display); font-weight:200; font-size:clamp(2.25rem,5.5vw,3rem); line-height:1.1; color:var(--ink); margin:0 0 1rem; }
+  .article .standfirst{ font-family:var(--display); font-style:italic; font-weight:300; font-size:1.1875rem; line-height:1.6; color:var(--ink-soft); margin:0 0 1.25rem; }
+  .article .dateline{ font-family:var(--mono); font-size:.625rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); padding-bottom:2.5rem; margin:0 0 2.5rem; border-bottom:1px solid var(--rule); }
+  .article .body p{ font-size:1.0625rem; line-height:1.95; color:var(--ink-body); margin:0 0 1.6rem; }
+
+  @media (max-width:880px){
+    .stage{ grid-template-columns:1fr; }
+    ul.index{ max-height:16rem; }
+    .panel{ top:auto; width:100%; max-height:84svh; border-left:0; border-top:1px solid var(--rule); transform:translateY(101%); }
+    ul.posts button{ grid-template-columns:2rem 1fr; }
+    .post-meta{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ transition-duration:.01ms !important; } }
+</style>
+</head>
+<body>
+
+<canvas id="bloom" aria-hidden="true"></canvas>
+<canvas id="grain" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+
+<div class="shell">
+
+  <header class="masthead">
+    <a class="sigil" href="#" data-goto="home">Joel Jussila</a>
+    <nav class="top">
+      <a href="#" data-goto="places">Places</a>
+      <a href="#" data-goto="blog">Blog</a>
+      <a href="https://www.linkedin.com/in/joel-jussila/">LinkedIn</a>
+    </nav>
+  </header>
+
+  <!-- ---- home ---- -->
+  <section data-view="home">
+    <div class="hero">
+      <h1>Joel Jussila</h1>
+      <p class="lede">Curious about the world from first principles. Engineer by training, former national-level athlete, permanently mid-sidequest.</p>
+      <p class="lede dim">I believe technology is how we design a world we actually want to live in, and I want to play my own part in that. Most of what I do starts with taking something apart to see what it was really for. The rest of the time I am somewhere else &mdash; a hundred and twenty-one places so far, eighty-three of them photographed.</p>
+
+      <div class="doors">
+        <a class="door" href="#" data-goto="places">Places I've explored <span class="arrow">&rarr;</span></a>
+        <a class="door" href="#" data-goto="blog">Writing <span class="arrow">&rarr;</span></a>
+      </div>
+
+      <ul class="elsewhere">
+        <li><a href="https://www.linkedin.com/in/joel-jussila/" rel="me">LinkedIn</a></li>
+        <li><a href="https://x.com/JoelJussila" rel="me">X</a></li>
+        <li><a href="https://github.com/joeljussila" rel="me">GitHub</a></li>
+        <li><a href="https://instagram.com/jussilajoel" rel="me">Instagram</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ---- places ---- -->
+  <section data-view="places" hidden>
+    <div class="view-head">
+      <p class="kicker">Atlas / <span data-proto="count-inline"></span> places</p>
+      <h2 class="section">Places I've explored</h2>
+      <p class="note">Drag to turn the globe. Every mark is somewhere I have been; open one to see what it looks like.</p>
+    </div>
+    <div class="stage">
+      <div class="globe-holder">
+        <canvas data-proto="globe" data-globe-style="fill" aria-label="Rotatable globe marking visited places. The list beside it covers the same places."></canvas>
+      </div>
+      <nav>
+        <p class="index-head"><span>Index</span><span data-proto="count"></span></p>
+        <ul class="index" data-proto="index"></ul>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ---- blog ---- -->
+  <section data-view="blog" hidden>
+    <div class="view-head">
+      <p class="kicker">Blog</p>
+      <h2 class="section">Writing</h2>
+      <p class="note">Thinking out loud, mostly unfinished. Placeholder pieces until there is something real to put here.</p>
+    </div>
+    <ul class="posts" data-proto="posts"></ul>
+  </section>
+
+  <!-- ---- one post ---- -->
+  <section data-view="post" hidden>
+    <article class="article">
+      <a class="back" data-goto="blog">&larr; All writing</a>
+      <h2 data-proto="post-title"></h2>
+      <p class="standfirst" data-proto="post-standfirst"></p>
+      <p class="dateline" data-proto="post-date"></p>
+      <div class="body" data-proto="post-body"></div>
+    </article>
+  </section>
+
+</div>
+
+<aside class="panel" data-proto="panel" data-open="false" aria-hidden="true">
+  <button class="panel-close" data-proto="panel-close" type="button">Close</button>
+  <h3 data-proto="panel-title"></h3>
+  <p class="coords" data-proto="panel-coords"></p>
+  <div class="frames" data-proto="panel-frames"></div>
+</aside>
+
+<figure class="lightbox" data-proto="lightbox" data-open="false" aria-hidden="true">
+  <img data-proto="lightbox-img" alt="">
+  <figcaption data-proto="lightbox-caption"></figcaption>
+</figure>
+
+<script src="proto.js"></script>
+<script>
+/* ---- the bloom -------------------------------------------------------------
+ *
+ * Soft columns of indigo light, smeared vertically and blurred until nothing
+ * has an edge. Drawn at a sixth of the window's size into a small buffer and
+ * scaled up on the way out: the upscaling is most of the blur, which costs
+ * nothing, and the canvas filter finishes the job. A buffer that small can be
+ * repainted every frame without noticing, so the columns can breathe.
+ */
+(function(){
+  var canvas = document.getElementById("bloom");
+  var ctx = canvas.getContext("2d");
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var buf = document.createElement("canvas");
+  var bctx = buf.getContext("2d");
+
+  var W = 0, H = 0, bw = 0, bh = 0;
+  var SCALE = 6;
+
+  // Each column drifts and breathes on its own slow cycle. Periods are all
+  // different and none divide into another, so the arrangement never repeats.
+  var columns = [
+    { x: 0.30, w: 0.20, y: 0.52, h: 0.42, a: 1.15, hue: "42,72,205", px: 41, py: 67, ax: 0.055, ay: 0.07 },
+    { x: 0.44, w: 0.11, y: 0.50, h: 0.55, a: 1.00, hue: "26,44,150", px: 53, py: 89, ax: 0.040, ay: 0.05 },
+    { x: 0.62, w: 0.24, y: 0.46, h: 0.36, a: 0.80, hue: "58,96,230", px: 73, py: 59, ax: 0.070, ay: 0.06 },
+    { x: 0.16, w: 0.16, y: 0.62, h: 0.30, a: 0.42, hue: "70,110,235", px: 97, py: 79, ax: 0.060, ay: 0.05 },
+    { x: 0.80, w: 0.18, y: 0.58, h: 0.34, a: 0.34, hue: "40,68,190", px: 61, py: 101, ax: 0.050, ay: 0.06 }
+  ];
+
+  function draw(t){
+    bctx.clearRect(0,0,bw,bh);
+
+    for (var i = 0; i < columns.length; i++){
+      var c = columns[i];
+      var cx = (c.x + Math.sin(t / c.px) * c.ax) * bw;
+      var cy = (c.y + Math.sin(t / c.py) * c.ay) * bh;
+      var rw = c.w * bw;
+      var rh = c.h * bh;
+      // Breathing brightness, a slower cycle again than the drift.
+      var alpha = c.a * (0.72 + 0.28 * Math.sin(t / (c.px * 1.7) + i));
+
+      var g = bctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rw, rh));
+      g.addColorStop(0,   "rgba(" + c.hue + "," + (alpha).toFixed(3) + ")");
+      g.addColorStop(0.45,"rgba(" + c.hue + "," + (alpha * 0.35).toFixed(3) + ")");
+      g.addColorStop(1,   "rgba(" + c.hue + ",0)");
+
+      bctx.save();
+      bctx.translate(cx, cy);
+      // Squashed horizontally: the light falls in vertical bands.
+      bctx.scale(rw / Math.max(rw, rh), rh / Math.max(rw, rh));
+      bctx.translate(-cx, -cy);
+      bctx.fillStyle = g;
+      bctx.fillRect(cx - Math.max(rw,rh), cy - Math.max(rw,rh), Math.max(rw,rh) * 2, Math.max(rw,rh) * 2);
+      bctx.restore();
+    }
+
+    ctx.clearRect(0,0,W,H);
+    ctx.save();
+    if (typeof ctx.filter === "string") ctx.filter = "blur(" + Math.round(W / 90) + "px)";
+    ctx.drawImage(buf, 0, 0, bw, bh, 0, 0, W, H);
+    ctx.restore();
+    ctx.filter = "none";
+  }
+
+  function resize(){
+    W = Math.max(1, innerWidth); H = Math.max(1, innerHeight);
+    var dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    bw = Math.max(2, Math.round(W / SCALE));
+    bh = Math.max(2, Math.round(H / SCALE));
+    buf.width = bw; buf.height = bh;
+    draw(performance.now() / 1000);
+  }
+
+  var timer;
+  addEventListener("resize", function(){ clearTimeout(timer); timer = setTimeout(resize, 150); });
+  resize();
+
+  if (!reduced){
+    (function tick(){
+      draw(performance.now() / 1000);
+      requestAnimationFrame(tick);
+    })();
+  }
+})();
+
+/* ---- grain ---------------------------------------------------------------- */
+(function(){
+  var canvas = document.getElementById("grain");
+  var ctx = canvas.getContext("2d");
+  var size = 180;
+  var tile = document.createElement("canvas");
+  tile.width = tile.height = size;
+  var t = tile.getContext("2d");
+  var image = t.createImageData(size, size);
+  var data = image.data;
+  for (var i = 0; i < data.length; i += 4){
+    data[i] = 237; data[i+1] = 234; data[i+2] = 226;
+    data[i+3] = Math.random() * 255 * 0.055;
+  }
+  t.putImageData(image, 0, 0);
+  var pattern = ctx.createPattern(tile, "repeat");
+
+  function paint(){
+    var W = innerWidth, H = innerHeight;
+    var dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0,0,W,H);
+  }
+  var timer;
+  addEventListener("resize", function(){ clearTimeout(timer); timer = setTimeout(paint, 150); });
+  paint();
+})();
+
+Proto.start();
+</script>
+</body>
+</html>

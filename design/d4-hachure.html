@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hachure - Joel Jussila</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@300;400&display=swap">
+<style>
+  :root{
+    --paper:     #F7F4EC;
+    --paper-2:   #EDE8DC;
+    --ink:       #14130F;
+    --ink-mid:   #33312A;
+    --ink-soft:  #6B6759;
+    --ink-faint: #A09A88;
+    --rule:      #CFC8B6;
+    --display: "EB Garamond", Garamond, Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    margin:0; background:var(--paper); color:var(--ink-mid);
+    font-family:var(--display); font-weight:400; font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+
+  #water{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+
+  .veil{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:radial-gradient(50% 46% at 50% 42%, rgba(247,244,236,.97) 0%, rgba(247,244,236,.94) 54%, rgba(247,244,236,.58) 80%, rgba(247,244,236,.10) 100%);
+  }
+  html[data-current-view="places"] .veil,
+  html[data-current-view="blog"] .veil,
+  html[data-current-view="post"] .veil{ background:rgba(247,244,236,.90); }
+
+  /* ---- the leaf ----------------------------------------------------------
+     A single sheet inset from the window with a torn edge, so the page reads
+     as a piece of paper laid on the water rather than as a screen. */
+
+  .leaf{
+    position:relative; z-index:2;
+    min-height:100%;
+    max-width:60rem;
+    margin:0 auto;
+    padding: clamp(2rem,5vh,4rem) clamp(1.75rem,6vw,5rem) 5rem;
+  }
+
+  .rule-top{
+    display:flex; justify-content:space-between; align-items:baseline; gap:2rem;
+    font-family:var(--mono); font-size:.625rem; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--ink-faint);
+    padding-bottom:.9rem; border-bottom:1px solid var(--rule);
+  }
+  .rule-top a{ color:var(--ink-faint); text-decoration:none; transition:color .3s ease; }
+  .rule-top a:hover{ color:var(--ink); }
+  nav.top{ display:flex; gap:1.5rem; }
+  html[data-current-view="places"] nav.top a[data-goto="places"],
+  html[data-current-view="blog"] nav.top a[data-goto="blog"],
+  html[data-current-view="post"] nav.top a[data-goto="blog"]{ color:var(--ink); }
+
+  /* ---- home --------------------------------------------------------------- */
+
+  .titlepage{
+    text-align:center;
+    padding: clamp(4rem,16vh,10rem) 0 clamp(3rem,8vh,5rem);
+    max-width:36rem; margin:0 auto;
+  }
+
+  .titlepage .above{
+    font-family:var(--mono); font-size:.625rem; letter-spacing:.35em;
+    text-transform:uppercase; color:var(--ink-soft); margin:0 0 2.5rem;
+  }
+
+  h1{
+    font-family:var(--display); font-weight:400;
+    font-size:clamp(2.75rem,8vw,4.5rem);
+    line-height:1.06; letter-spacing:.01em;
+    color:var(--ink); margin:0 0 1.75rem;
+  }
+
+  .ornament{
+    display:block; width:4.5rem; height:1px; background:var(--ink-faint);
+    margin:0 auto 1.75rem; position:relative;
+  }
+  .ornament::after{
+    content:""; position:absolute; left:50%; top:-2px;
+    width:5px; height:5px; margin-left:-2.5px;
+    background:var(--paper); border:1px solid var(--ink-faint); transform:rotate(45deg);
+  }
+
+  .lede{ font-size:1.125rem; line-height:1.8; color:var(--ink-mid); margin:0 0 1.4rem; }
+  .lede.small{ font-size:1rem; color:var(--ink-soft); font-style:italic; }
+
+  .doors{ display:flex; flex-direction:column; align-items:center; gap:.9rem; margin:2.75rem 0 3.25rem; }
+  .door{
+    font-family:var(--display); font-size:1.125rem; font-style:italic;
+    color:var(--ink); text-decoration:none;
+    padding:.15rem 0; border-bottom:1px solid var(--ink-faint);
+    transition:border-color .35s ease, letter-spacing .35s ease;
+  }
+  .door:hover{ border-color:var(--ink); letter-spacing:.02em; }
+
+  .elsewhere{
+    list-style:none; margin:0 auto; padding:1.25rem 0 0; max-width:24rem;
+    border-top:1px solid var(--rule);
+    display:flex; justify-content:center; flex-wrap:wrap; gap:.4rem 1.5rem;
+  }
+  .elsewhere a{
+    font-family:var(--mono); font-size:.5625rem; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--ink-soft); text-decoration:none;
+  }
+  .elsewhere a:hover{ color:var(--ink); }
+
+  /* ---- section heads -------------------------------------------------------- */
+
+  .view-head{ text-align:center; padding: clamp(2.5rem,7vh,4rem) 0 clamp(1.5rem,4vh,2.5rem); }
+  .kicker{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.3em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 1rem; }
+  h2.section{ font-family:var(--display); font-weight:400; font-size:clamp(2rem,5.5vw,3rem); line-height:1.1; color:var(--ink); margin:0 0 .9rem; }
+  .note{ font-size:.9375rem; font-style:italic; color:var(--ink-soft); max-width:40ch; margin:0 auto; }
+
+  /* ---- places ----------------------------------------------------------------- */
+
+  .stage{ display:grid; grid-template-columns:minmax(0,1fr) 13rem; gap:clamp(1.75rem,4vw,3rem); align-items:start; }
+  .globe-holder{ position:relative; display:grid; place-items:center; min-height:min(56vh,30rem); }
+
+  canvas[data-proto="globe"]{
+    display:block; touch-action:none; cursor:grab; max-width:100%;
+    --g-sea: transparent;
+    --g-land: rgba(247,244,236,.55);
+    --g-edge: #14130F;
+    --g-grat: rgba(20,19,15,.12);
+    --g-rim: rgba(20,19,15,.5);
+    --g-mark: #14130F;
+    --g-mark-hi: #14130F;
+    --g-label: #14130F;
+    --g-glow: 20,19,15;
+    --g-glow-alpha: 0.04;
+    --g-label-font: 400 11px "IBM Plex Mono", monospace;
+    --g-hatch-gap: 2.6;
+    --g-hatch-angle: -18;
+    --g-mark-shape: dot;
+  }
+  canvas.dragging{ cursor:grabbing; }
+
+  .index-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:var(--mono); font-size:.5625rem; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--ink-faint);
+    padding-bottom:.7rem; margin:0 0 .5rem; border-bottom:1px solid var(--rule);
+  }
+  ul.index{ list-style:none; margin:0; padding:0 .5rem 0 0; max-height:min(27rem,52vh); overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--rule) transparent; }
+  ul.index::-webkit-scrollbar{ width:4px; }
+  ul.index::-webkit-scrollbar-thumb{ background:var(--rule); }
+  ul.index button{
+    width:100%; display:flex; align-items:baseline; gap:.8rem;
+    padding:.28rem 0; background:none; border:0; text-align:left;
+    font-family:var(--display); font-size:1rem; color:var(--ink-soft);
+    cursor:pointer; transition:color .25s ease;
+  }
+  ul.index button:hover, ul.index button[aria-current="true"]{ color:var(--ink); font-style:italic; }
+  ul.index .n{ font-family:var(--mono); font-size:.5rem; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+
+  /* ---- panel --------------------------------------------------------------------- */
+
+  .panel{
+    position:fixed; top:0; right:0; bottom:0; z-index:30;
+    width:min(24rem,100vw); background:var(--paper);
+    border-left:1px solid var(--rule); padding:clamp(1.5rem,3.5vw,2.25rem);
+    overflow-y:auto; transform:translateX(101%); visibility:hidden;
+    box-shadow:-30px 0 60px -45px rgba(20,19,15,.35);
+  }
+  .ready .panel{ transition: transform .5s cubic-bezier(.22,.61,.36,1), visibility 0s linear .5s; }
+  .panel[data-open="true"]{ transform:none; visibility:visible; transition: transform .5s cubic-bezier(.22,.61,.36,1), visibility 0s; }
+
+  .panel-close{ background:none; border:0; padding:0; font-family:var(--mono); font-size:.5625rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-faint); cursor:pointer; transition:color .3s ease; }
+  .panel-close:hover{ color:var(--ink); }
+  .panel h3{ font-family:var(--display); font-weight:400; font-size:2rem; line-height:1.1; color:var(--ink); margin:1.5rem 0 .3rem; }
+  .coords{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.12em; color:var(--ink-faint); margin:0 0 1.6rem; }
+
+  .frames{ display:grid; gap:.75rem; }
+  /* Warm sepia-black: the photographs are printed in the same ink as the
+     water behind them. */
+  .frame{ position:relative; aspect-ratio:4/5; overflow:hidden; cursor:pointer; background:var(--paper-2); }
+  .frame img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:grayscale(1) contrast(1.1) brightness(1.05) sepia(.22);
+    mix-blend-mode:multiply;
+    transition:transform .8s cubic-bezier(.22,.61,.36,1);
+  }
+  .frame::after{ content:""; position:absolute; inset:0; pointer-events:none; background:#14130F; mix-blend-mode:screen; opacity:.30; }
+  .frame:hover img{ transform:scale(1.03); }
+  .frame.is-empty{ display:grid; place-items:center; cursor:default; font-family:var(--mono); font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); }
+  .frame.is-empty::after{ display:none; }
+
+  .lightbox{
+    position:fixed; inset:0; z-index:60; background:rgba(247,244,236,.96);
+    display:grid; place-items:center; padding:clamp(1.5rem,6vw,5rem);
+    opacity:0; visibility:hidden; transition:opacity .4s ease, visibility .4s; cursor:zoom-out;
+  }
+  .lightbox[data-open="true"]{ opacity:1; visibility:visible; }
+  .lightbox img{ max-width:100%; max-height:80vh; display:block; box-shadow:0 30px 70px -45px rgba(20,19,15,.5); }
+  .lightbox figcaption{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-soft); margin-top:1.1rem; text-align:center; }
+
+  /* ---- blog ------------------------------------------------------------------------- */
+
+  ul.posts{ list-style:none; margin:0 auto; padding:0; max-width:44rem; }
+  ul.posts button{
+    width:100%; display:block; text-align:center;
+    padding:2rem 0; background:none; border:0; border-bottom:1px solid var(--rule);
+    cursor:pointer; transition:opacity .3s ease;
+  }
+  ul.posts li:first-child button{ border-top:1px solid var(--rule); }
+  ul.posts button:hover{ opacity:.62; }
+  .post-n{ display:block; font-family:var(--mono); font-size:.5rem; letter-spacing:.3em; color:var(--ink-faint); margin-bottom:.9rem; }
+  .post-title{ display:block; font-family:var(--display); font-weight:400; font-size:1.75rem; line-height:1.2; color:var(--ink); margin-bottom:.5rem; }
+  .post-stand{ display:block; font-style:italic; font-size:1rem; color:var(--ink-soft); max-width:38ch; margin:0 auto .9rem; }
+  .post-meta{ display:flex; justify-content:center; gap:1.25rem; font-family:var(--mono); font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); }
+
+  /* ---- one post ------------------------------------------------------------------------ */
+
+  .article{ max-width:32rem; margin:0 auto; padding: clamp(2rem,6vh,4rem) 0 5rem; }
+  .article .back{ display:block; text-align:center; font-family:var(--mono); font-size:.5625rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-faint); text-decoration:none; margin-bottom:3rem; cursor:pointer; }
+  .article .back:hover{ color:var(--ink); }
+  .article h2{ font-family:var(--display); font-weight:400; font-size:clamp(2rem,5vw,2.75rem); line-height:1.15; color:var(--ink); margin:0 0 1rem; text-align:center; }
+  .article .standfirst{ font-style:italic; font-size:1.125rem; line-height:1.6; color:var(--ink-soft); margin:0 0 1.25rem; text-align:center; }
+  .article .dateline{ font-family:var(--mono); font-size:.5625rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-faint); text-align:center; padding-bottom:2.5rem; margin:0 0 2.5rem; border-bottom:1px solid var(--rule); }
+  .article .body p{ font-size:1.125rem; line-height:1.8; color:var(--ink-mid); margin:0 0 1.4rem; text-align:justify; hyphens:auto; }
+  .article .body p:first-child::first-letter{ font-size:3.4em; float:left; line-height:.84; padding:.05em .1em 0 0; color:var(--ink); }
+
+  @media (max-width:880px){
+    .stage{ grid-template-columns:1fr; }
+    ul.index{ max-height:15rem; }
+    .panel{ top:auto; width:100%; max-height:84svh; border-left:0; border-top:1px solid var(--rule); transform:translateY(101%); }
+    .article .body p{ text-align:left; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ transition-duration:.01ms !important; } }
+</style>
+</head>
+<body>
+
+<canvas id="water" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+
+<div class="leaf">
+
+  <div class="rule-top">
+    <a href="#" data-goto="home">Joel Jussila</a>
+    <nav class="top">
+      <a href="#" data-goto="places">Places</a>
+      <a href="#" data-goto="blog">Blog</a>
+    </nav>
+  </div>
+
+  <!-- ---- home ---- -->
+  <section data-view="home">
+    <div class="titlepage">
+      <p class="above">Helsinki &middot; San Francisco &middot; Elsewhere</p>
+      <h1>Joel Jussila</h1>
+      <span class="ornament" aria-hidden="true"></span>
+      <p class="lede">Curious about the world from first principles. Engineer by training, former national-level athlete, permanently mid-sidequest.</p>
+      <p class="lede small">I believe technology is how we design a world we actually want to live in, and I want to play my own part in that. Most of what I do starts with taking something apart to see what it was really for.</p>
+
+      <div class="doors">
+        <a class="door" href="#" data-goto="places">Places I've explored</a>
+        <a class="door" href="#" data-goto="blog">Writing</a>
+      </div>
+
+      <ul class="elsewhere">
+        <li><a href="https://www.linkedin.com/in/joel-jussila/" rel="me">LinkedIn</a></li>
+        <li><a href="https://x.com/JoelJussila" rel="me">X</a></li>
+        <li><a href="https://github.com/joeljussila" rel="me">GitHub</a></li>
+        <li><a href="https://instagram.com/jussilajoel" rel="me">Instagram</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ---- places ---- -->
+  <section data-view="places" hidden>
+    <div class="view-head">
+      <p class="kicker">Atlas &middot; <span data-proto="count-inline"></span> places</p>
+      <h2 class="section">Places I've explored</h2>
+      <p class="note">Drag to turn the globe. Every mark is somewhere I have been; open one to see what it looks like.</p>
+    </div>
+    <div class="stage">
+      <div class="globe-holder">
+        <canvas data-proto="globe" data-globe-style="hatch" aria-label="Rotatable globe marking visited places. The list beside it covers the same places."></canvas>
+      </div>
+      <nav>
+        <p class="index-head"><span>Index</span><span data-proto="count"></span></p>
+        <ul class="index" data-proto="index"></ul>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ---- blog ---- -->
+  <section data-view="blog" hidden>
+    <div class="view-head">
+      <p class="kicker">Blog</p>
+      <h2 class="section">Writing</h2>
+      <p class="note">Thinking out loud, mostly unfinished. Placeholder pieces until there is something real to put here.</p>
+    </div>
+    <ul class="posts" data-proto="posts"></ul>
+  </section>
+
+  <!-- ---- one post ---- -->
+  <section data-view="post" hidden>
+    <article class="article">
+      <a class="back" data-goto="blog">&larr; All writing</a>
+      <h2 data-proto="post-title"></h2>
+      <p class="standfirst" data-proto="post-standfirst"></p>
+      <p class="dateline" data-proto="post-date"></p>
+      <div class="body" data-proto="post-body"></div>
+    </article>
+  </section>
+
+</div>
+
+<aside class="panel" data-proto="panel" data-open="false" aria-hidden="true">
+  <button class="panel-close" data-proto="panel-close" type="button">Close</button>
+  <h3 data-proto="panel-title"></h3>
+  <p class="coords" data-proto="panel-coords"></p>
+  <div class="frames" data-proto="panel-frames"></div>
+</aside>
+
+<figure class="lightbox" data-proto="lightbox" data-open="false" aria-hidden="true">
+  <img data-proto="lightbox-img" alt="">
+  <figcaption data-proto="lightbox-caption"></figcaption>
+</figure>
+
+<script src="proto.js"></script>
+<script>
+/* ---- turbulent water ------------------------------------------------------
+ *
+ * Short strokes laid along a flow field, the way an engraver hatches moving
+ * water. The field is built from sines whose horizontal frequencies are whole
+ * cycles of the tile width, so the tile repeats without a seam and can simply
+ * be scrolled. Two layers at different scales and speeds give the parallax
+ * that reads as depth.
+ */
+(function(){
+  var canvas = document.getElementById("water");
+  var ctx = canvas.getContext("2d");
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var INK = "20,19,15";
+  var TAU = Math.PI * 2;
+
+  var layers = [
+    { speed: 0.07, alpha: 0.66, cyc: 3, rowGap: 7.5, len: 13, gap: 3.4, turb: 0.62, w: 0.6 },
+    { speed: 0.16, alpha: 0.88, cyc: 2, rowGap: 13,  len: 22, gap: 5.4, turb: 0.92, w: 0.85 }
+  ];
+
+  var W = 0, H = 0;
+
+  function paintLayer(layer, index){
+    var tile = document.createElement("canvas");
+    tile.width = Math.max(1, Math.round(W));
+    tile.height = Math.max(1, Math.round(H));
+    var t = tile.getContext("2d");
+    t.lineCap = "round";
+
+    var fx1 = TAU * layer.cyc / W;
+    var fx2 = TAU * (layer.cyc * 2) / W;
+    var fx3 = TAU * (layer.cyc * 5) / W;
+    var fy1 = TAU * 1.7 / H;
+    var fy2 = TAU * 3.3 / H;
+    var fy3 = TAU * 0.8 / H;
+    var seed = index * 4.1;
+
+    // The angle a stroke is laid at. Three crossed waves at unrelated
+    // frequencies, so the field curls back on itself instead of settling into
+    // the regular lattice two waves produce.
+    function angle(x, y){
+      return (Math.sin(x * fx1 + y * fy1 + seed) +
+              Math.sin(x * fx2 - y * fy2 + seed * 1.4) * 0.55 +
+              Math.sin(x * fx3 + y * fy3 * 2.1 - seed) * 0.22) * layer.turb;
+    }
+
+    // A second, much slower field decides how much ink any given patch of
+    // water gets. This is what makes the hatching pool and thin the way an
+    // engraver's does, rather than covering the sheet evenly.
+    var dx1 = TAU * 1 / W, dx2 = TAU * 2 / W;
+    var dy1 = TAU * 0.9 / H, dy2 = TAU * 1.6 / H;
+    function density(x, y){
+      var d = Math.sin(x * dx1 + y * dy1 + seed * 2.2) * 0.6
+            + Math.sin(x * dx2 - y * dy2 + seed) * 0.4;
+      return Math.max(0, Math.min(1, 0.52 + d * 0.62));
+    }
+
+    t.strokeStyle = "rgba(" + INK + "," + layer.alpha + ")";
+    t.lineWidth = layer.w;
+
+    var step = layer.len + layer.gap;
+    for (var y = 0; y < H + layer.rowGap; y += layer.rowGap){
+      // Every other row is offset, so the strokes never queue into columns.
+      var stagger = (Math.round(y / layer.rowGap) % 2) * step * 0.5;
+      var depth = 0.55 + 0.45 * Math.min(1, Math.max(0, y / H));
+
+      for (var x = -layer.len + stagger; x < W + layer.len; x += step){
+        var d = density(x, y);
+        if (d < 0.16) continue;            // clear water
+        var a = angle(x, y);
+        var half = layer.len * (0.55 + d * 0.55) / 2;
+        var ddx = Math.cos(a) * half, ddy = Math.sin(a) * half;
+        t.globalAlpha = depth * d;
+        t.beginPath();
+        t.moveTo(x - ddx, y - ddy);
+        t.lineTo(x + ddx, y + ddy);
+        t.stroke();
+      }
+    }
+    t.globalAlpha = 1;
+
+    layer.tile = tile;
+    layer.offset = layer.offset || Math.random() * W;
+  }
+
+  function resize(){
+    W = Math.max(1, innerWidth); H = Math.max(1, innerHeight);
+    var dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    layers.forEach(paintLayer);
+    render();
+  }
+
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    for (var i = 0; i < layers.length; i++){
+      var l = layers[i];
+      if (!l.tile || !l.tile.width) continue;
+      var x = -(l.offset % W);
+      ctx.drawImage(l.tile, x, 0);
+      ctx.drawImage(l.tile, x + W, 0);
+    }
+  }
+
+  var last = performance.now();
+  function tick(now){
+    var dt = Math.min(now - last, 100) / 1000;
+    last = now;
+    for (var i = 0; i < layers.length; i++) layers[i].offset += layers[i].speed * dt * 60;
+    render();
+    requestAnimationFrame(tick);
+  }
+
+  var timer;
+  addEventListener("resize", function(){ clearTimeout(timer); timer = setTimeout(resize, 150); });
+  resize();
+  if (!reduced) requestAnimationFrame(tick);
+})();
+
+Proto.start();
+</script>
+</body>
+</html>

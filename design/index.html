@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five directions - joeljussila.com</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Newsreader:opsz,wght@6..72,200;6..72,300&display=swap">
+<style>
+  :root{
+    --paper:#F4F2EC; --ink:#16181C; --ink-soft:#61656C; --ink-faint:#9AA0A8; --rule:#D6D2C8;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --display:Newsreader,Georgia,serif;
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink-soft);
+    font-family:var(--mono); font-size:13px; line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:64rem; margin:0 auto; padding:clamp(2rem,6vh,4rem) clamp(1.5rem,5vw,3rem) 5rem; }
+
+  h1{ font-family:var(--display); font-weight:200; font-size:clamp(2rem,5vw,3rem); line-height:1.1; color:var(--ink); margin:0 0 .75rem; }
+  .sub{ max-width:60ch; margin:0 0 1rem; font-size:.8125rem; }
+  .meta{ font-size:.625rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 3rem; padding-bottom:1.25rem; border-bottom:1px solid var(--rule); }
+
+  ol{ list-style:none; margin:0; padding:0; display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule); }
+  li{ background:var(--paper); }
+
+  a.card{
+    display:grid; grid-template-columns:3.5rem 1fr 9rem; gap:1.5rem; align-items:start;
+    padding:1.5rem 1.5rem 1.6rem; text-decoration:none; color:inherit;
+    transition:background-color .25s ease;
+  }
+  a.card:hover{ background:#EAE7DF; }
+
+  .n{ font-size:.625rem; letter-spacing:.14em; color:var(--ink-faint); padding-top:.35rem; }
+  .name{ display:block; font-family:var(--display); font-weight:300; font-size:1.5rem; line-height:1.15; color:var(--ink); margin-bottom:.4rem; }
+  .desc{ display:block; font-size:.75rem; line-height:1.65; max-width:48ch; }
+  .swatches{ display:flex; gap:0; margin-top:.85rem; }
+  .swatches span{ width:1.6rem; height:1.6rem; display:block; border:1px solid rgba(0,0,0,.10); border-left-width:0; }
+  .swatches span:first-child{ border-left-width:1px; }
+  .tags{ display:flex; flex-direction:column; gap:.3rem; align-items:flex-end; text-align:right; font-size:.5625rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); padding-top:.4rem; }
+
+  .foot{ margin-top:2.5rem; font-size:.6875rem; color:var(--ink-faint); max-width:62ch; }
+  .foot code{ font-size:.9em; color:var(--ink-soft); }
+
+  @media (max-width:760px){
+    a.card{ grid-template-columns:2.5rem 1fr; }
+    .tags{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Five directions</h1>
+  <p class="sub">Working prototypes, not pictures. Each one carries the whole site &mdash; home, the globe with its real 121 places and 83 photographs, the blog index and a post &mdash; so a direction can be judged on how it behaves, not only on how it looks. Every background is generated in code; nothing from the reference images is used.</p>
+  <p class="meta">Drafted 9 September 2026 &middot; Pick one, then it gets built properly</p>
+
+  <ol>
+    <li>
+      <a class="card" href="d1-tide.html">
+        <span class="n">01</span>
+        <span>
+          <span class="name">Tide</span>
+          <span class="desc">Indigo woodblock. A hatched swell rises from the foot of the window while the words sit on clear paper. Cormorant Garamond set large and light. The globe is engraved &mdash; land filled with horizontal hatching, coastlines in ink.</span>
+          <span class="swatches" aria-hidden="true">
+            <span style="background:#F2EEE3"></span><span style="background:#E8E2D2"></span>
+            <span style="background:#5A6893"></span><span style="background:#2E3F7A"></span><span style="background:#16224C"></span>
+          </span>
+        </span>
+        <span class="tags"><span>Indigo / cream</span><span>Sea</span><span>Painterly</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="d2-cartograph.html">
+        <span class="n">02</span>
+        <span>
+          <span class="name">Cartograph</span>
+          <span class="desc">The page as a survey sheet: ruled border, corner registration marks, a title block along the bottom carrying the metadata. Contour lines breathe underneath. Spectral and Plex Mono. The globe is a wireframe and the places are surveyor's crosses.</span>
+          <span class="swatches" aria-hidden="true">
+            <span style="background:#EFE9DA"></span><span style="background:#E7E0CD"></span>
+            <span style="background:#5B75AE"></span><span style="background:#2B4A8C"></span><span style="background:#1C3468"></span>
+          </span>
+        </span>
+        <span class="tags"><span>Prussian / manila</span><span>Mountains</span><span>Technical</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="d3-grain.html">
+        <span class="n">03</span>
+        <span>
+          <span class="name">Grain</span>
+          <span class="desc">Black, white and grey. Archivo set enormous and tight against a hard twelve-column grid. Behind it a field of grey rectangles crossfading over minutes under heavy film grain. The loudest of the five and the most contemporary.</span>
+          <span class="swatches" aria-hidden="true">
+            <span style="background:#FAFAF8"></span><span style="background:#D8D8D5"></span>
+            <span style="background:#6E7176"></span><span style="background:#3A3C40"></span><span style="background:#0E0F11"></span>
+          </span>
+        </span>
+        <span class="tags"><span>Black / white</span><span>Aerial</span><span>Brutalist</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="d4-hachure.html">
+        <span class="n">04</span>
+        <span>
+          <span class="name">Hachure</span>
+          <span class="desc">A rare-book title page on bone paper. EB Garamond centred, an ornament, justified body text with a drop cap. Engraved water fills the margins &mdash; ink pooling and thinning across a flow field &mdash; and leaves a clear oval where the words are.</span>
+          <span class="swatches" aria-hidden="true">
+            <span style="background:#F7F4EC"></span><span style="background:#EDE8DC"></span>
+            <span style="background:#6B6759"></span><span style="background:#33312A"></span><span style="background:#14130F"></span>
+          </span>
+        </span>
+        <span class="tags"><span>Black / bone</span><span>Water</span><span>Bookish</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="d5-nocturne.html">
+        <span class="n">05</span>
+        <span>
+          <span class="name">Nocturne</span>
+          <span class="desc">The dark one, for holding against what you have live now. Same restraint as the current site but indigo instead of gold: columns of blurred blue light drifting behind a fine vertical comb, Newsreader on near-black. The globe glows.</span>
+          <span class="swatches" aria-hidden="true">
+            <span style="background:#0B0C0E"></span><span style="background:#22252B"></span>
+            <span style="background:#2A48B8"></span><span style="background:#7C90D8"></span><span style="background:#EDEAE2"></span>
+          </span>
+        </span>
+        <span class="tags"><span>Indigo / black</span><span>Atmosphere</span><span>Continuity</span></span>
+      </a>
+    </li>
+  </ol>
+
+  <p class="foot">All five share <code>proto.js</code>, which carries the real orthographic projection, hemisphere clipping and drag behaviour lifted from <code>places/index.html</code>. A direction changes the globe by setting CSS custom properties on the canvas &mdash; nothing else. Photographs are duotoned into each palette in the grid and released to full colour when you open one.</p>
+</div>
+</body>
+</html>

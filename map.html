@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Map — Joel Jussila</title>
+<meta name="description" content="A globe of the places I have been, with photographs from each of them.">
+<link rel="canonical" href="https://joeljussila.com/map.html">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Joel Jussila">
+<meta property="og:title" content="Map — Joel Jussila">
+<meta property="og:description" content="A globe of the places I have been, with photographs from each of them.">
+<meta property="og:url" content="https://joeljussila.com/map.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Map — Joel Jussila">
+<meta name="twitter:description" content="A globe of the places I have been, with photographs from each of them.">
+
+<meta name="theme-color" content="#EFE9DA">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@300&display=swap">
+<link rel="stylesheet" href="/site.css">
+<script defer src="/globe.js"></script>
+<script defer src="/map.js"></script>
+</head>
+<body>
+<div class="page">
+<img class="ground g-map" src="/ground.webp" alt="" aria-hidden="true">
+<main class="body">
+<h1>Map</h1>
+<div class="map">
+<canvas id="globe" data-lon="12" data-lat="24" width="400" height="400" role="img" aria-label="Orthographic globe with a mark for each place visited. Drag to turn it."></canvas>
+<div class="panel">
+  <div id="index-view">
+    <span class="mono index-head">Places</span>
+    <div class="index" id="index"></div>
+  </div>
+  <div class="detail" id="detail" hidden aria-live="polite">
+    <div class="detail-head mono"><span id="detail-coords"></span><a href="#" id="detail-close">Close</a></div>
+    <h2 id="detail-name"></h2>
+    <div class="plates" id="detail-plates"></div>
+    <nav class="folio mono" aria-label="Site, within the place"><a href="/">Home</a><a href="/map.html" aria-current="page">Map</a><a href="/blog.html">Blog</a></nav>
+  </div>
+</div>
+</div>
+</main>
+<nav class="folio mono" aria-label="Site">
+<a href="/">Home</a>
+<a href="/map.html" aria-current="page">Map</a>
+<a href="/blog.html">Blog</a>
+</nav>
+</div>
+</body>
+</html>
