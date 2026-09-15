@@ -164,8 +164,18 @@ the hosting moves.
 4. Delete the Cloudflare Pages project once the certificate is issued and the
    site answers from Vercel, so a stale deployment cannot be reached.
 
-Turning off the Cloudflare proxy also turns off the Cloudflare analytics
-beacon. Vercel's own Web Analytics is the replacement: enable it in the
-project and add `<script defer src="/_vercel/insights/script.js"></script>` to
-each page. It is same-origin, so the content security policy already allows
-it — which is why `cloudflareinsights.com` is no longer in the policy.
+## Analytics
+
+Vercel Web Analytics, which replaced the Cloudflare beacon that went away with
+the Cloudflare proxy. Every page carries
+
+```html
+<script defer src="/_vercel/insights/script.js"></script>
+```
+
+and it has to be switched on in the project as well (Vercel → the project →
+Analytics → Enable) — the tag alone does nothing, and the script 404s until it
+is on. Both the script and the beacon it posts to are served from this domain,
+so the content security policy needs no entry for them; that is the reason to
+prefer it over a third-party tag, and the reason `cloudflareinsights.com` is
+no longer in the policy. It sets no cookies, so it needs no consent banner.
